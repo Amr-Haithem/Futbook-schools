@@ -1,0 +1,29 @@
+ //to put the uid in the model of CustomUser
+ /* CustomUser _userFromFirebaseUser(User user) {
+    print(user) ;
+    return user != null ? CustomUser(uid: user.uid) : null;
+  }*/
+
+
+
+
+
+  //ui for signing out
+
+  /* actions: [
+            FlatButton.icon(icon:Icon(Icons.person),onPressed: ()async { await _auth.signOut();}, label: Text('log out'))
+          ],*/
+
+
+//to generate number of widget
+List.generate(
+                15,
+                (index) => TextButton(
+                  child: Text('hello',style: TextStyle(fontSize: 50),),
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    primary: Colors.amber,
+                    minimumSize: Size(300.0, 200.0),
+                  ),
+                ),
+              )
