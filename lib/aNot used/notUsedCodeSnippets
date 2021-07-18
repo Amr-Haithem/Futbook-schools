@@ -27,3 +27,25 @@ List.generate(
                   ),
                 ),
               )
+
+//this didn't work(not listening to return statement)
+
+    for (int i = 0; i < requestedSlotsIndices.length; i++) {
+      await databaseReference
+          .child("Reservation_Data")
+          //will be replaced by user from email
+          .child("UndefinedSchool")
+          .child(requestedFieldIndex.toString())
+          .child("day0")
+          .child(requestedSlotsIndices[i].toString())
+          .once()
+          .then((DataSnapshot dss) {
+            print(dss.value as bool);
+        if (dss.value as bool == true) {
+          return false;
+        }
+      });
+    }
+
+    return true;
+  }

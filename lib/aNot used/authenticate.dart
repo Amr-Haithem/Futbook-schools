@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:futbook_school/aNot%20used/Register.dart';
-import '../Authenticate/SignIn.dart';
+import 'package:futbook_school/Pages/Screens/Authenticate/SignIn.dart';
 
 class Authenticate extends StatefulWidget {
   @override

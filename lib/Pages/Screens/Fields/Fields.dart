@@ -17,7 +17,7 @@ class _FieldsState extends State<Fields> {
   Widget build(BuildContext context) {
 
     return Container(
-      color: Colors.amberAccent[200],
+      color: Colors.white,
 
 
       child: Wrap(

@@ -2,8 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Pages/Screens/Fields/Fields.dart';
+import 'package:futbook_school/Pages/Screens/Invoice/Invoice.dart';
 import 'package:futbook_school/Pages/Screens/Slots/Slots.dart';
 import 'package:provider/provider.dart';
+import 'Pages/Screens/CustomerInfo/CustomerInfo.dart';
 import 'Pages/Wrapper.dart';
 import 'Services/auth.dart';
 Future<void> main() async {
@@ -26,6 +28,8 @@ class _MyAppState extends State<MyApp> {
        home:Wrapper(),
           routes: {
             '/Slots': (context) => Slots(),
+            '/CustomerInfo': (context) => CustomerInfo(),
+            '/Invoice': (context) => Invoice(),
 
           },
     ));

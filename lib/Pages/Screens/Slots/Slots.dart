@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:futbook_school/Pages/Screens/Fields/SingleFieldDataForSlots.dart';
+import 'package:futbook_school/Models/DataWithoutNameAndPhoneNumber.dart';
+import 'package:futbook_school/Models/DataOfUserAndFieldIndexOnly.dart';
 import 'package:futbook_school/Pages/Screens/Slots/singleButtonBlock.dart';
 import 'package:futbook_school/Services/FirestoreService.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
@@ -20,12 +20,11 @@ class _SlotsState extends State<Slots> {
 
   @override
   Widget build(BuildContext context) {
-
-    Slots.arr=[];
+    Slots.arr = [];
     print("emptied slots array");
     //TODO to ensure null-safety put an ! after (context)
 
-    final SingleFieldDataForSlots args =
+    final DataOfUserAndFieldIndexOnly args =
         ModalRoute.of(context).settings.arguments;
     return Scaffold(
         appBar: AppBar(
@@ -40,10 +39,20 @@ class _SlotsState extends State<Slots> {
                 textStyle: TextStyle(
                   fontSize: 40,
                 )),
-            child: Text("manipulate database"),
-            onPressed: () {
-              rt.updateReservationData(
-                  args.user, args.indexOfThisField, Slots.arr);
+            child: Text("Reserve"),
+            onPressed: () async {
+              if(await rt.updateReservationData(
+                  args.user, args.indexOfThisField, Slots.arr)){
+
+                Navigator.pushNamed(context, '/CustomerInfo',arguments: DataWithoutNameAndPhoneNumber(user:args.user,indexOfThisField: args.indexOfThisField,slotsReserved:Slots.arr));
+
+              }
+              else{
+                Slots.arr=[];
+                print("didn't register : a message from slots page");
+              }
+
+
             },
           ),
           Padding(

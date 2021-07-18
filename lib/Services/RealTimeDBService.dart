@@ -11,11 +11,67 @@ class RealTimeDBService {
   }
 
   void readData() {
-    databaseReference.once().then((DataSnapshot dataSnapShot) {
+    databaseReference
+        .child("Reservation_Data")
+        .child("UndefinedSchool")
+        .once()
+        .then((DataSnapshot dataSnapShot) {
       print(dataSnapShot.value);
     });
   }
 
+  Future<bool> checkInstantlyIfReserved(String schoolUser,
+      int requestedFieldIndex, List requestedSlotsIndices) async {
+    bool availability = true;
+    for (int i = 0; i < requestedSlotsIndices.length; i++) {
+      await databaseReference
+          .child("Reservation_Data")
+          //will be replaced by user from email
+          .child("UndefinedSchool")
+          .child(requestedFieldIndex.toString())
+          .child("day0")
+          .child(requestedSlotsIndices[i].toString())
+          .once()
+          .then((DataSnapshot dss) {
+        if (dss.value as bool == true) {
+          availability = false;
+        }
+      });
+    }
+    return availability;
+  }
+
+  Future<bool> updateReservationData(
+      User user, int fieldIndex, List slotIndices) async {
+    print(getUserNameFromEmailAddress(user.email));
+
+    if (await checkInstantlyIfReserved(
+        getUserNameFromEmailAddress(user.email), fieldIndex, slotIndices)) {
+      for (int i = 0; i < slotIndices.length; i++) {
+        await databaseReference
+            .child("Reservation_Data")
+        //will be replaced by user from email
+            .child("UndefinedSchool")
+            .child(fieldIndex.toString())
+            .child("day0")
+            .update({slotIndices[i].toString(): true});
+
+      }
+      print("registerd");
+      return true;
+    } else {
+      print("you can't register");
+      return false;
+    }
+
+    /**/
+  }
+
+  void deleteData() {
+    databaseReference.child("1").remove();
+  }
+
+  //functional methods (not database related)
   String getUserNameFromEmailAddress(String s) {
     String newS = "";
     for (int i = 0; i < s.length; i++) {
@@ -25,21 +81,5 @@ class RealTimeDBService {
       newS += s[i];
     }
     return newS;
-  }
-
-  void updateReservationData(User user, int fieldIndex, List slotIndices) {
-    print(getUserNameFromEmailAddress(user.email));
-    for(int i = 0;i<slotIndices.length;i++){
-      databaseReference
-          .child("Reservation_Data")
-          .child("UndefinedSchool")
-          .child(fieldIndex.toString())
-          .child("day0")
-          .update({slotIndices[i].toString(): true});
-    }
-  }
-
-  void deleteData() {
-    databaseReference.child("1").remove();
   }
 }

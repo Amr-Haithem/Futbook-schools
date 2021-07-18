@@ -3,10 +3,10 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-class SingleFieldDataForSlots{
+class DataOfUserAndFieldIndexOnly{
   final User user;
   final int indexOfThisField;
 
-  SingleFieldDataForSlots({this.user, this.indexOfThisField});
+  DataOfUserAndFieldIndexOnly({this.user, this.indexOfThisField});
 
 }
