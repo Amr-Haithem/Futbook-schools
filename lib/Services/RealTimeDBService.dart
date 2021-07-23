@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+//the following is the equality class to compare two lists
+import 'package:collection/collection.dart';
+
 class RealTimeDBService {
   final databaseReference = FirebaseDatabase.instance.reference();
 
@@ -50,12 +53,11 @@ class RealTimeDBService {
       for (int i = 0; i < slotIndices.length; i++) {
         await databaseReference
             .child("Reservation_Data")
-        //will be replaced by user from email
+            //will be replaced by user from email
             .child("UndefinedSchool")
             .child(fieldIndex.toString())
             .child("day0")
             .update({slotIndices[i].toString(): true});
-
       }
       print("registerd");
       return true;
@@ -67,11 +69,58 @@ class RealTimeDBService {
     /**/
   }
 
+  Future<bool> reserveForCustomer(User user, int fieldIndex, List slotIndices,
+      String nameOfClient, String phoneNumber) async {
+    await databaseReference
+        .child("Reservation_Data")
+        //will be replaced by user from email
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")
+        .child("EachReservationData")
+        // here we implement a dynamic way to set data in the EachReservationData
+        .push()
+        .set({
+      //Todo dont forget to get the day data from an input ui like a slider or something
+      "nameOFClient": nameOfClient,
+      "phoneNumber": phoneNumber,
+      "reservedSlots": slotIndices
+    });
+  }
+
+  //not complete yet
+  Future<Map> unReserveForCustomer(
+      User user, int fieldIndex, List slotIndices) async {
+    Map<dynamic, dynamic> data;
+
+    await databaseReference
+        .child("Reservation_Data")
+        //will be replaced by user from email
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")
+        .child("EachReservationData")
+        // here we implement a dynamic way to set data in the EachReservationData
+        .get()
+        .then((DataSnapshot dataSnapShot) {
+      data = dataSnapShot.value;
+    });
+    List reservationDataOfCustomers = data.values.toList();
+    for (int i = 0; i < reservationDataOfCustomers.length; i++) {
+      List slotsReservedFormDB =
+          reservationDataOfCustomers[i].values.toList()[2];
+      if (eq(slotIndices, slotsReservedFormDB)) {
+        print("exists");
+        break;
+      }
+    }
+  }
+
   void deleteData() {
     databaseReference.child("1").remove();
   }
 
-  //functional methods (not database related)
+  //functional methods (not database related):
   String getUserNameFromEmailAddress(String s) {
     String newS = "";
     for (int i = 0; i < s.length; i++) {
@@ -82,4 +131,7 @@ class RealTimeDBService {
     }
     return newS;
   }
+
+  //this function compares the values of two lists
+  Function eq = const ListEquality().equals;
 }
