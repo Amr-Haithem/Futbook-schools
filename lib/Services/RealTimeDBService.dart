@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -34,6 +36,7 @@ class RealTimeDBService {
           .child(requestedFieldIndex.toString())
           .child("day0")
           .child(requestedSlotsIndices[i].toString())
+          .child("reserved")
           .once()
           .then((DataSnapshot dss) {
         if (dss.value as bool == true) {
@@ -57,67 +60,109 @@ class RealTimeDBService {
             .child("UndefinedSchool")
             .child(fieldIndex.toString())
             .child("day0")
-            .update({slotIndices[i].toString(): true});
+            .child(slotIndices[i].toString())
+            .update({"reserved": true});
       }
-      print("registerd");
+      print("slots reserved");
       return true;
     } else {
-      print("you can't register");
+      print("you can't reserve these slots");
       return false;
     }
-
-    /**/
   }
 
-  Future<bool> reserveForCustomer(User user, int fieldIndex, List slotIndices,
-      String nameOfClient, String phoneNumber) async {
-    await databaseReference
-        .child("Reservation_Data")
-        //will be replaced by user from email
-        .child("UndefinedSchool")
-        .child(fieldIndex.toString())
-        .child("day0")
-        .child("EachReservationData")
-        // here we implement a dynamic way to set data in the EachReservationData
-        .push()
-        .set({
-      //Todo dont forget to get the day data from an input ui like a slider or something
-      "nameOFClient": nameOfClient,
-      "phoneNumber": phoneNumber,
-      "reservedSlots": slotIndices
-    });
-  }
-
-  //not complete yet
-  Future<Map> unReserveForCustomer(
-      User user, int fieldIndex, List slotIndices) async {
-    Map<dynamic, dynamic> data;
-
-    await databaseReference
-        .child("Reservation_Data")
-        //will be replaced by user from email
-        .child("UndefinedSchool")
-        .child(fieldIndex.toString())
-        .child("day0")
-        .child("EachReservationData")
-        // here we implement a dynamic way to set data in the EachReservationData
-        .get()
-        .then((DataSnapshot dataSnapShot) {
-      data = dataSnapShot.value;
-    });
-    List reservationDataOfCustomers = data.values.toList();
-    for (int i = 0; i < reservationDataOfCustomers.length; i++) {
-      List slotsReservedFormDB =
-          reservationDataOfCustomers[i].values.toList()[2];
-      if (eq(slotIndices, slotsReservedFormDB)) {
-        print("exists");
-        break;
-      }
+  Future<bool> updateNameAndPhoneNumberForCustomer(User user, int fieldIndex,
+      List slotIndices, String nameOfClient, String phoneNumber) async {
+    for (int i = 0; i < slotIndices.length; i++) {
+      await databaseReference
+          .child("Reservation_Data")
+          //will be replaced by user from email
+          .child("UndefinedSchool")
+          .child(fieldIndex.toString())
+          .child("day0")
+          .child(slotIndices[i].toString())
+          .update({
+        "phoneNumberOfCustomer": phoneNumber,
+        "nameOfCustomer": nameOfClient
+      });
     }
   }
+
+  Future<Map> unReserveSlots(
+      User user, int fieldIndex, List slotIndices) async {
+    for (int i = 0; i < slotIndices.length; i++) {
+      await databaseReference
+          .child("Reservation_Data")
+          //will be replaced by user from email
+          .child("UndefinedSchool")
+          .child(fieldIndex.toString())
+          .child("day0")
+          .child(slotIndices[i].toString())
+          .update({
+        "phoneNumberOfCustomer": "none",
+        "nameOfCustomer": "none",
+        "reserved": false
+      });
+      print("unreserved slot " + slotIndices[i].toString());
+
+      // here we implement a dynamic way to set data in the EachReservationData
+    }
+  }
+//listener function to listen to slots changed in a particular day in a particular field
+  void listenToThisPageSlots(
+      User user, int fieldIndex) {
+    for(int i = 0;i<14;i++){
+
+      FirebaseDatabase.instance
+          .reference()
+          .child("Reservation_Data")
+      //will be replaced by user from email
+          .child("UndefinedSchool")
+          .child(fieldIndex.toString())
+          .child("day0")
+          .child(i.toString())
+          .onChildChanged
+          .listen((Event event) {
+        print("yeaaaah we listened");
+        // process event
+      });
+
+    }
+  }
+
+  /*where onXxx is one of
+
+  value
+  onChildAdded
+  onChildRemoved
+  onChildChanged*/
+
+
 
   void deleteData() {
     databaseReference.child("1").remove();
+  }
+
+  //generate my school system of solution one
+
+  Future<void> InitializeSchoolDBAutomatically() async {
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 7; j++) {
+        for (int k = 0; k < 15; k++) {
+          await databaseReference
+              .child("Reservation_Data")
+              .child("UndefinedSchool")
+              .child(i.toString())
+              .child("day" + j.toString())
+              .child(k.toString())
+              .set({
+            "reserved": false,
+            "nameOfCustomer": "none",
+            "phoneNumberOfCustomer": "none"
+          });
+        }
+      }
+    }
   }
 
   //functional methods (not database related):

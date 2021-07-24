@@ -18,15 +18,29 @@ class _SlotsState extends State<Slots> {
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _auth = AuthService();
   final rt = RealTimeDBService();
+  DataOfUserAndFieldIndexOnly args;
 
+  @override
+  void initState() {
+    super.initState();
+    //ahmed sameh (is it a good practice?)
+    Future.delayed(Duration.zero, () {
+      setState(() {
+        args = ModalRoute
+            .of(context)
+            .settings
+            .arguments;
+      });
+      rt.listenToThisPageSlots(args.user, args.indexOfThisField);
+
+    });
+  }
   @override
   Widget build(BuildContext context) {
     Slots.arr = [];
     print("emptied slots array");
     //TODO to ensure null-safety put an ! after (context)
 
-    final DataOfUserAndFieldIndexOnly args =
-        ModalRoute.of(context).settings.arguments;
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue,
@@ -72,10 +86,9 @@ class _SlotsState extends State<Slots> {
                           )),
                       child: Text("Un Reserve"),
                       onPressed: () async {
-                       await rt.unReserveForCustomer(args.user, args.indexOfThisField,
-                            Slots.arr);
-                        Slots.arr=[];
-
+                        await rt.unReserveSlots(
+                            args.user, args.indexOfThisField, Slots.arr);
+                        Slots.arr = [];
                       },
                     )
                   ],

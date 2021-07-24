@@ -49,3 +49,32 @@ List.generate(
 
     return true;
   }
+
+  // the cow function
+
+  Future<Map> unReserveForCustomer(
+      User user, int fieldIndex, List slotIndices) async {
+    Map<dynamic, dynamic> data;
+
+    await databaseReference
+        .child("Reservation_Data")
+        //will be replaced by user from email
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")
+        .child("EachReservationData")
+        // here we implement a dynamic way to set data in the EachReservationData
+        .get()
+        .then((DataSnapshot dataSnapShot) {
+      data = dataSnapShot.value;
+    });
+    List reservationDataOfCustomers = data.values.toList();
+    for (int i = 0; i < reservationDataOfCustomers.length; i++) {
+      List slotsReservedFormDB =
+          reservationDataOfCustomers[i].values.toList()[2];
+      if (eq(slotIndices, slotsReservedFormDB)) {
+        print("exists");
+        break;
+      }
+    }
+  }
