@@ -46,7 +46,11 @@ class RealTimeDBService {
     }
     return availability;
   }
+  //*
 
+
+  // */
+//todo pass a whole map other than a for loop
   Future<bool> updateReservationData(
       User user, int fieldIndex, List slotIndices) async {
     print(getUserNameFromEmailAddress(user.email));
