@@ -1,29 +1,13 @@
-import 'dart:math';
-
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 
 class RealTimeDBService {
   final databaseReference = FirebaseDatabase.instance.reference();
-
-  void writeData() {
-    databaseReference
-        .child("Reservation_Data")
-        .set({'1': 'ID1', 'data': 'this is a sample data'});
-  }
-
-  void readData() {
-    databaseReference
-        .child("Reservation_Data")
-        .child("UndefinedSchool")
-        .once()
-        .then((DataSnapshot dataSnapShot) {
-      print(dataSnapShot.value);
-    });
-  }
 
   Future<bool> checkInstantlyIfReserved(String schoolUser,
       int requestedFieldIndex, List requestedSlotsIndices) async {
@@ -46,8 +30,8 @@ class RealTimeDBService {
     }
     return availability;
   }
-  //*
 
+  //*
 
   // */
 //todo pass a whole map other than a for loop
@@ -112,36 +96,32 @@ class RealTimeDBService {
       // here we implement a dynamic way to set data in the EachReservationData
     }
   }
+
 //listener function to listen to slots changed in a particular day in a particular field
-  void listenToThisPageSlots(
-      User user, int fieldIndex) {
-    for(int i = 0;i<14;i++){
-
-      FirebaseDatabase.instance
-          .reference()
-          .child("Reservation_Data")
-      //will be replaced by user from email
-          .child("UndefinedSchool")
-          .child(fieldIndex.toString())
-          .child("day0")
-          .child(i.toString())
-          .onChildChanged
-          .listen((Event event) {
-        print("yeaaaah we listened");
-        // process event
-      });
-
-    }
+  //this listener downloads one kilo bytes each time it downloads data
+  void listenToThisPageSlots(User user, int fieldIndex) {
+    FirebaseDatabase.instance
+        .reference()
+        .child("Reservation_Data")
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")
+        .onValue
+        .listen((event) {
+      print("listened");
+      List data = event.snapshot.value;
+      for (int i = 0; i < data.length; i++) {
+        //for (int j = 0; j < 3; j++) {
+        print(data[i]["reserved"]);
+        //  }
+      }
+    });
   }
 
-  /*where onXxx is one of
-
-  value
-  onChildAdded
-  onChildRemoved
-  onChildChanged*/
-
-
+  /*FirebaseDatabase.instance.reference().child("Reservation_Data")
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")*/
 
   void deleteData() {
     databaseReference.child("1").remove();
