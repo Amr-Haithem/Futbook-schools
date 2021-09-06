@@ -99,7 +99,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
                       ),
                       onPressed: () async {
                         if (_formKey.currentState.validate()) {
-                          rt.updateNameAndPhoneNumberForCustomer(
+                          rt.UpdateUserData(
                               args.user,
                               args.indexOfThisField,
                               args.slotsReserved,

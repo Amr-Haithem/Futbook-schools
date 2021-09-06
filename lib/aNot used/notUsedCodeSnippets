@@ -78,3 +78,21 @@ List.generate(
       }
     }
   }
+
+
+  //old slots orientation
+   SingleButtonBlock(slot: '8-9 AM', associatedIndex: 0),
+                        SingleButtonBlock(slot: '9-10 AM', associatedIndex: 1),
+                        SingleButtonBlock(slot: '10-11 AM', associatedIndex: 2),
+                        SingleButtonBlock(slot: '11-12 AM', associatedIndex: 3),
+                        SingleButtonBlock(slot: '12-1 PM', associatedIndex: 4),
+                        SingleButtonBlock(slot: '1-2 PM', associatedIndex: 5),
+                        SingleButtonBlock(slot: '2-3 PM', associatedIndex: 6),
+                        SingleButtonBlock(slot: '3-4 PM', associatedIndex: 7),
+                        SingleButtonBlock(slot: '4-5 PM', associatedIndex: 8),
+                        SingleButtonBlock(slot: '5-6 PM', associatedIndex: 9),
+                        SingleButtonBlock(slot: '6-8 PM', associatedIndex: 10),
+                        SingleButtonBlock(slot: '8-9 PM', associatedIndex: 11),
+                        SingleButtonBlock(slot: '9-10 PM', associatedIndex: 12),
+                        SingleButtonBlock(slot: '10-11 PM', associatedIndex: 13),
+                        SingleButtonBlock(slot: '12-1 AM', associatedIndex: 14),

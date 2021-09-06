@@ -5,6 +5,9 @@ import 'package:firebase_database/firebase_database.dart';
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:futbook_school/Models/RerservationHolder.dart';
+import 'package:futbook_school/Pages/Screens/Slots/Slots.dart';
+import 'package:provider/provider.dart';
 
 class RealTimeDBService {
   final databaseReference = FirebaseDatabase.instance.reference();
@@ -20,7 +23,6 @@ class RealTimeDBService {
           .child(requestedFieldIndex.toString())
           .child("day0")
           .child(requestedSlotsIndices[i].toString())
-          .child("reserved")
           .once()
           .then((DataSnapshot dss) {
         if (dss.value as bool == true) {
@@ -31,9 +33,6 @@ class RealTimeDBService {
     return availability;
   }
 
-  //*
-
-  // */
 //todo pass a whole map other than a for loop
   Future<bool> updateReservationData(
       User user, int fieldIndex, List slotIndices) async {
@@ -48,8 +47,7 @@ class RealTimeDBService {
             .child("UndefinedSchool")
             .child(fieldIndex.toString())
             .child("day0")
-            .child(slotIndices[i].toString())
-            .update({"reserved": true});
+            .update({slotIndices[i].toString(): true});
       }
       print("slots reserved");
       return true;
@@ -59,25 +57,39 @@ class RealTimeDBService {
     }
   }
 
-  Future<bool> updateNameAndPhoneNumberForCustomer(User user, int fieldIndex,
-      List slotIndices, String nameOfClient, String phoneNumber) async {
+  Future<bool> UpdateUserData(User user, int fieldIndex, List slotIndices,
+      String nameOfClient, String phoneNumber) async {
     for (int i = 0; i < slotIndices.length; i++) {
+      //updating User data "the data of reservation"
       await databaseReference
-          .child("Reservation_Data")
+          .child("User data")
           //will be replaced by user from email
           .child("UndefinedSchool")
           .child(fieldIndex.toString())
           .child("day0")
-          .child(slotIndices[i].toString())
-          .update({
+          .child(slotIndices[0].toString() +
+              '-' +
+              slotIndices[slotIndices.length - 1].toString())
+          .set({
         "phoneNumberOfCustomer": phoneNumber,
-        "nameOfCustomer": nameOfClient
+        "nameOfCustomer": nameOfClient,
+        "slots": slotIndices
       });
     }
   }
 
   Future<Map> unReserveSlots(
       User user, int fieldIndex, List slotIndices) async {
+    await databaseReference
+        .child("User data")
+        //will be replaced by user from email
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")
+        .child(slotIndices[0].toString() +
+            '-' +
+            slotIndices[slotIndices.length - 1].toString())
+        .remove();
     for (int i = 0; i < slotIndices.length; i++) {
       await databaseReference
           .child("Reservation_Data")
@@ -85,37 +97,57 @@ class RealTimeDBService {
           .child("UndefinedSchool")
           .child(fieldIndex.toString())
           .child("day0")
-          .child(slotIndices[i].toString())
-          .update({
-        "phoneNumberOfCustomer": "none",
-        "nameOfCustomer": "none",
-        "reserved": false
-      });
-      print("unreserved slot " + slotIndices[i].toString());
-
-      // here we implement a dynamic way to set data in the EachReservationData
+          .update({slotIndices[i].toString(): false});
     }
+    print("unreserved slot " +
+        slotIndices.toString() +
+        "and removed it from User data");
   }
 
 //listener function to listen to slots changed in a particular day in a particular field
   //this listener downloads one kilo bytes each time it downloads data
-  void listenToThisPageSlots(User user, int fieldIndex) {
-    FirebaseDatabase.instance
+  Stream streamValueOfUserData(int fieldIndex){
+    return FirebaseDatabase.instance
         .reference()
-        .child("Reservation_Data")
+        .child("User data")
         .child("UndefinedSchool")
         .child(fieldIndex.toString())
         .child("day0")
+    //todo take a look if to change on vlaue
+        .onValue;
+  }
+
+
+  List<ReservationHolder> dataReservation = [];
+
+  void listenToThisPageSlots(
+      User user, int fieldIndex) {
+    FirebaseDatabase.instance
+        .reference()
+        .child("User data")
+        .child("UndefinedSchool")
+        .child(fieldIndex.toString())
+        .child("day0")
+        //todo take a look if to change on vlaue
         .onValue
         .listen((event) {
-      print("listened");
-      List data = event.snapshot.value;
-      for (int i = 0; i < data.length; i++) {
-        //for (int j = 0; j < 3; j++) {
-        print(data[i]["reserved"]);
-        //  }
-      }
+      print("listened blah blah");
+      Map data = event.snapshot.value;
+      dataReservation=[];
+      data.forEach((key, value) {
+        dataReservation.add(ReservationHolder(
+          name: value['nameOfCustomer'],
+          phoneNumber: value['phoneNumberOfCustomer'],
+          slots: value['slots'],
+        ));
+      });
+      //here
     });
+  }
+
+  //remove a certain listener
+  void removeListener() {
+    // databaseReference.removeEventListener(valueEventListener);
   }
 
   /*FirebaseDatabase.instance.reference().child("Reservation_Data")
@@ -123,9 +155,7 @@ class RealTimeDBService {
         .child(fieldIndex.toString())
         .child("day0")*/
 
-  void deleteData() {
-    databaseReference.child("1").remove();
-  }
+  //functional methods (not database related):
 
   //generate my school system of solution one
 
@@ -138,18 +168,12 @@ class RealTimeDBService {
               .child("UndefinedSchool")
               .child(i.toString())
               .child("day" + j.toString())
-              .child(k.toString())
-              .set({
-            "reserved": false,
-            "nameOfCustomer": "none",
-            "phoneNumberOfCustomer": "none"
-          });
+              .update({k.toString(): false});
         }
       }
     }
   }
 
-  //functional methods (not database related):
   String getUserNameFromEmailAddress(String s) {
     String newS = "";
     for (int i = 0; i < s.length; i++) {

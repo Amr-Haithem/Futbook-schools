@@ -8,8 +8,18 @@ import 'Slots.dart';
 class SingleButtonBlock extends StatefulWidget {
   final String slot;
   final int associatedIndex;
+  final int scale;
+  final List slots;
+  final String name;
+  final String phoneNumber;
 
-  const SingleButtonBlock({this.slot, this.associatedIndex});
+  const SingleButtonBlock(
+      {this.slot,
+      this.associatedIndex,
+      this.scale,
+      this.slots,
+      this.name,
+      this.phoneNumber});
 
   @override
   _SingleButtonBlockState createState() => _SingleButtonBlockState();
@@ -30,18 +40,17 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin:
-          const EdgeInsets.only(top: 15.0, bottom: 15.0, left: 5.0, right: 5.0),
+      // margin:
+      //     const EdgeInsets.only(top: 15.0, bottom: 15.0, left: 5.0, right: 5.0),
       child: ElevatedButton(
         child: Text(
-          widget.slot,
-          style: TextStyle(color: Colors.grey[900],fontFamily: "Cairo", fontSize: 35),
-
+          putNameIfReserved(widget.name, widget.phoneNumber),
+          style: TextStyle(
+              color: Colors.grey[900], fontFamily: "Cairo", fontSize: 32),
         ),
         onPressed: () {
           if (!selected) {
             Slots.arr.add(widget.associatedIndex);
-
             selected = !selected;
             setState(() {
               backgroundColorSwitch = Colors.yellowAccent;
@@ -59,9 +68,17 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
         },
         style: ElevatedButton.styleFrom(
           primary: backgroundColorSwitch,
-          minimumSize: Size(280.0, 58.0),
+          minimumSize: Size(280.0, 58.0 * widget.scale),
         ),
       ),
     );
+  }
+
+  String putNameIfReserved(String name, String phoneNumber) {
+    if (name != null && phoneNumber != null) {
+      return name + phoneNumber;
+    } else {
+      return '';
+    }
   }
 }
