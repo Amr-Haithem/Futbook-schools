@@ -7,19 +7,19 @@ import 'Slots.dart';
 
 class SingleButtonBlock extends StatefulWidget {
   final String slot;
-  final int associatedIndex;
   final int scale;
   final List slots;
   final String name;
   final String phoneNumber;
+  final bool Reserved;
 
   const SingleButtonBlock(
       {this.slot,
-      this.associatedIndex,
       this.scale,
       this.slots,
       this.name,
-      this.phoneNumber});
+      this.phoneNumber,
+      this.Reserved});
 
   @override
   _SingleButtonBlockState createState() => _SingleButtonBlockState();
@@ -50,14 +50,14 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
         ),
         onPressed: () {
           if (!selected) {
-            Slots.arr.add(widget.associatedIndex);
+            Slots.arr.add(widget.slots);
             selected = !selected;
             setState(() {
               backgroundColorSwitch = Colors.yellowAccent;
             });
             print(Slots.arr);
           } else {
-            Slots.arr.remove(widget.associatedIndex);
+            Slots.arr.remove(widget.slots);
 
             selected = !selected;
             setState(() {

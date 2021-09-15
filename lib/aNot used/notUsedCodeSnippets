@@ -96,3 +96,35 @@ List.generate(
                         SingleButtonBlock(slot: '9-10 PM', associatedIndex: 12),
                         SingleButtonBlock(slot: '10-11 PM', associatedIndex: 13),
                         SingleButtonBlock(slot: '12-1 AM', associatedIndex: 14),
+
+
+
+
+
+
+
+
+   void listenToThisPageSlots(
+         User user, int fieldIndex) {
+       FirebaseDatabase.instance
+           .reference()
+           .child("User data")
+           .child("UndefinedSchool")
+           .child(fieldIndex.toString())
+           .child("day0")
+           //todo take a look if to change on vlaue
+           .onValue
+           .listen((event) {
+         print("listened blah blah");
+         Map data = event.snapshot.value;
+         dataReservation=[];
+         data.forEach((key, value) {
+           dataReservation.add(ReservationHolder(
+             name: value['nameOfCustomer'],
+             phoneNumber: value['phoneNumberOfCustomer'],
+             slots: value['slots'],
+           ));
+         });
+         //here
+       });
+     }

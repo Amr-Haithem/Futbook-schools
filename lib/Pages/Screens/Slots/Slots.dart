@@ -8,6 +8,7 @@ import 'package:futbook_school/Services/FirestoreService.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
 import 'package:futbook_school/Services/auth.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import "package:charcode/ascii.dart";
 
 class Slots extends StatefulWidget {
   List SlotsMeaning = [
@@ -39,7 +40,8 @@ class Slots extends StatefulWidget {
 class _SlotsState extends State<Slots> {
   int shifterHelper;
 
-//this function will extract me each in
+//this function will extract me each length of the umm data begotten from the db
+
   int scaleFunctions(int i, List listOfAllData) {
     if (i == 0) {
       shifterHelper = 0;
@@ -49,11 +51,19 @@ class _SlotsState extends State<Slots> {
         i < listOfAllData.length &&
         i + shifterHelper == listOfAllData[i]['slots'][0]) {
       shifterHelper += listOfAllData[i]['slots'].length - 1;
-      //print(listOfAllData[i]['slots'].length.toString() + "hello");
       return listOfAllData[i]['slots'].length;
     } else {
-      // print(1);
       return 1;
+    }
+  }
+
+  //the following function returns 'a' for example after a number bigger than 9
+  List listProviderForNumbersBiggerThan9(int theNumber) {
+    List<String> chars = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    if (theNumber > 9) {
+      return [chars[theNumber - 10] + theNumber.toString()];
+    } else {
+      return [theNumber];
     }
   }
 
@@ -71,7 +81,6 @@ class _SlotsState extends State<Slots> {
       setState(() {
         args = ModalRoute.of(context).settings.arguments;
       });
-      rt.listenToThisPageSlots(args.user, args.indexOfThisField);
     });
   }
 
@@ -107,8 +116,6 @@ class _SlotsState extends State<Slots> {
                       onPressed: () async {
                         if (await rt.updateReservationData(
                             args.user, args.indexOfThisField, Slots.arr)) {
-                          //here we stop the listener
-
                           Navigator.pushNamed(context, '/CustomerInfo',
                               arguments: DataWithoutNameAndPhoneNumber(
                                   user: args.user,
@@ -142,7 +149,6 @@ class _SlotsState extends State<Slots> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     print('Stream changed');
-                    print(RealTimeDBService().dataReservation);
                     Map allData = snapshot.data.snapshot.value;
                     int numberOfSlotsRemoved = 0;
                     List listOfAllData;
@@ -152,8 +158,8 @@ class _SlotsState extends State<Slots> {
                         numberOfSlotsRemoved += value["slots"].length - 1;
                       });
                     }
+                    print(listOfAllData);
                     int shifterAmigo = 0;
-
                     return Container(
                       height: 500,
                       child: StaggeredGridView.countBuilder(
@@ -177,20 +183,20 @@ class _SlotsState extends State<Slots> {
 
                               return SingleButtonBlock(
                                 slot: widget.SlotsMeaning[index],
-                                associatedIndex: index,
                                 scale: listOfAllData[index]['slots'].length,
                                 slots: listOfAllData[index]['slots'],
                                 name: listOfAllData[index]['nameOfCustomer'],
                                 phoneNumber: listOfAllData[index]
                                     ['phoneNumberOfCustomer'],
+                                Reserved: true,
                               );
                             } else {
                               return SingleButtonBlock(
-                                slot: widget.SlotsMeaning[index],
-                                associatedIndex: index,
-                                scale: 1,
-                                slots: [0],
-                              );
+                                  slot: widget.SlotsMeaning[index],
+                                  scale: 1,
+                                  slots: listProviderForNumbersBiggerThan9(
+                                      index + shifterAmigo),
+                                  Reserved: false);
                             }
                           }),
                     );

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:io';
 
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
@@ -22,7 +23,7 @@ class RealTimeDBService {
           .child("UndefinedSchool")
           .child(requestedFieldIndex.toString())
           .child("day0")
-          .child(requestedSlotsIndices[i].toString())
+          .child(requestedSlotsIndices[i][0].toString())
           .once()
           .then((DataSnapshot dss) {
         if (dss.value as bool == true) {
@@ -34,6 +35,23 @@ class RealTimeDBService {
   }
 
 //todo pass a whole map other than a for loop
+
+  String returningTheActualSlots(String s) {
+    if (s[0] == 'a' ||
+        s[0] == 'b' ||
+        s[0] == 'c' ||
+        s[0] == 'd' ||
+        s[0] == 'e' ||
+        s[0] == 'f' ||
+        s[0] == 'g' ||
+        s[0] == 'h') {
+      String x = s.substring(1);
+      return x;
+    } else {
+      return s;
+    }
+  }
+
   Future<bool> updateReservationData(
       User user, int fieldIndex, List slotIndices) async {
     print(getUserNameFromEmailAddress(user.email));
@@ -47,7 +65,8 @@ class RealTimeDBService {
             .child("UndefinedSchool")
             .child(fieldIndex.toString())
             .child("day0")
-            .update({slotIndices[i].toString(): true});
+            .update(
+                {returningTheActualSlots(slotIndices[i][0].toString()): true});
       }
       print("slots reserved");
       return true;
@@ -55,6 +74,14 @@ class RealTimeDBService {
       print("you can't reserve these slots");
       return false;
     }
+  }
+
+  List getSlotsFromEmbeddedArray(List slotIndices) {
+    List x = [];
+    for (int i = 0; i < slotIndices.length; i++) {
+      x.add(int.parse(returningTheActualSlots(slotIndices[i][0])));
+    }
+    return x;
   }
 
   Future<bool> UpdateUserData(User user, int fieldIndex, List slotIndices,
@@ -67,13 +94,13 @@ class RealTimeDBService {
           .child("UndefinedSchool")
           .child(fieldIndex.toString())
           .child("day0")
-          .child(slotIndices[0].toString() +
+          .child(slotIndices[0][0].toString() +
               '-' +
-              slotIndices[slotIndices.length - 1].toString())
+              slotIndices[slotIndices.length - 1][0].toString())
           .set({
         "phoneNumberOfCustomer": phoneNumber,
         "nameOfCustomer": nameOfClient,
-        "slots": slotIndices
+        "slots": getSlotsFromEmbeddedArray(slotIndices)
       });
     }
   }
@@ -106,43 +133,15 @@ class RealTimeDBService {
 
 //listener function to listen to slots changed in a particular day in a particular field
   //this listener downloads one kilo bytes each time it downloads data
-  Stream streamValueOfUserData(int fieldIndex){
+  Stream streamValueOfUserData(int fieldIndex) {
     return FirebaseDatabase.instance
         .reference()
         .child("User data")
         .child("UndefinedSchool")
         .child(fieldIndex.toString())
         .child("day0")
-    //todo take a look if to change on vlaue
-        .onValue;
-  }
-
-
-  List<ReservationHolder> dataReservation = [];
-
-  void listenToThisPageSlots(
-      User user, int fieldIndex) {
-    FirebaseDatabase.instance
-        .reference()
-        .child("User data")
-        .child("UndefinedSchool")
-        .child(fieldIndex.toString())
-        .child("day0")
         //todo take a look if to change on vlaue
-        .onValue
-        .listen((event) {
-      print("listened blah blah");
-      Map data = event.snapshot.value;
-      dataReservation=[];
-      data.forEach((key, value) {
-        dataReservation.add(ReservationHolder(
-          name: value['nameOfCustomer'],
-          phoneNumber: value['phoneNumberOfCustomer'],
-          slots: value['slots'],
-        ));
-      });
-      //here
-    });
+        .onValue;
   }
 
   //remove a certain listener
