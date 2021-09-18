@@ -128,3 +128,48 @@ List.generate(
          //here
        });
      }
+
+     //staggered grid view
+     StaggeredGridView.countBuilder(
+                               physics: NeverScrollableScrollPhysics(),
+                               padding: EdgeInsets.symmetric(
+                                   vertical: 50, horizontal: 65),
+                               scrollDirection: Axis.horizontal,
+                                 staggeredTileBuilder: (index) => StaggeredTile.extent(
+                                   1 * scaleFunctions(index, listOfAllData), 220),
+                               crossAxisCount: 5,
+
+                               crossAxisSpacing: 10.0,
+                               mainAxisSpacing: 10.0,
+                               itemCount: 16 - numberOfSlotsRemoved,
+                               itemBuilder: (ctx, index) {
+                                 if (listOfAllData != null &&
+                                     index < listOfAllData.length &&
+                                     index + shifterAmigo ==
+                                         listOfAllData[index]['slots'][0]) {
+                                   shifterAmigo +=
+                                       listOfAllData[index]['slots'].length - 1;
+
+                                   return SingleButtonBlock(
+                                     slot: widget.SlotsMeaning[index],
+                                     scale: listOfAllData[index]['slots'].length,
+                                     slots: listOfAllData[index]['slots'],
+                                     name: listOfAllData[index]['nameOfCustomer'],
+                                     phoneNumber: listOfAllData[index]
+                                         ['phoneNumberOfCustomer'],
+                                     Reserved: true,
+                                   );
+                                 } else {
+                                   return SingleButtonBlock(
+                                       slot: widget.SlotsMeaning[index],
+                                       scale: 1,
+                                       slots: listProviderForNumbersBiggerThan9(
+                                           index + shifterAmigo),
+                                       Reserved: false);
+                                 }
+                               })
+
+
+                               /*allData.forEach((key, value) {
+                                                         numberOfSlotsRemoved += value["slots"].length - 1;
+                                                       });*/

@@ -78,9 +78,11 @@ class RealTimeDBService {
 
   List getSlotsFromEmbeddedArray(List slotIndices) {
     List x = [];
+
     for (int i = 0; i < slotIndices.length; i++) {
-      x.add(int.parse(returningTheActualSlots(slotIndices[i][0])));
+      x.add(int.parse(returningTheActualSlots(slotIndices[i][0].toString())));
     }
+
     return x;
   }
 
@@ -132,7 +134,7 @@ class RealTimeDBService {
   }
 
 //listener function to listen to slots changed in a particular day in a particular field
-  //this listener downloads one kilo bytes each time it downloads data
+//this listener downloads one kilo bytes each time it downloads data
   Stream streamValueOfUserData(int fieldIndex) {
     return FirebaseDatabase.instance
         .reference()
@@ -144,19 +146,19 @@ class RealTimeDBService {
         .onValue;
   }
 
-  //remove a certain listener
+//remove a certain listener
   void removeListener() {
     // databaseReference.removeEventListener(valueEventListener);
   }
 
-  /*FirebaseDatabase.instance.reference().child("Reservation_Data")
+/*FirebaseDatabase.instance.reference().child("Reservation_Data")
         .child("UndefinedSchool")
         .child(fieldIndex.toString())
         .child("day0")*/
 
-  //functional methods (not database related):
+//functional methods (not database related):
 
-  //generate my school system of solution one
+//generate my school system of solution one
 
   Future<void> InitializeSchoolDBAutomatically() async {
     for (int i = 0; i < 4; i++) {
@@ -184,6 +186,6 @@ class RealTimeDBService {
     return newS;
   }
 
-  //this function compares the values of two lists
+//this function compares the values of two lists
   Function eq = const ListEquality().equals;
 }

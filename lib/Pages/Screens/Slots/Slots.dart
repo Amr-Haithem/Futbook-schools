@@ -28,6 +28,10 @@ class Slots extends StatefulWidget {
     '10-11 PM',
     '12-1 AM',
     '1-2 AM',
+    '2-3 AM',
+    '4-5 AM',
+    '6-7 AM',
+    '7-8 AM',
   ];
 
   //static List;
@@ -40,7 +44,7 @@ class Slots extends StatefulWidget {
 class _SlotsState extends State<Slots> {
   int shifterHelper;
 
-//this function will extract me each length of the umm data begotten from the db
+//this function will extract me each length of the data begotten from the db
 
   int scaleFunctions(int i, List listOfAllData) {
     if (i == 0) {
@@ -65,6 +69,60 @@ class _SlotsState extends State<Slots> {
     } else {
       return [theNumber];
     }
+  }
+
+  String slotsMeaningGiver(List x) {
+    String y = '';
+    String s = '';
+    // String s = widget.SlotsMeaning[x[0]].substring(0, '-');
+    //print(s);
+    bool switcher = false;
+    for (int i = 0; widget.SlotsMeaning[x[0]][i] != '-'; i++) {
+      s += widget.SlotsMeaning[x[0]][i];
+    }
+    for (int i = 0; i < widget.SlotsMeaning[x[x.length - 1]].length; i++) {
+      if (widget.SlotsMeaning[x[x.length - 1]][i] == '-') {
+        switcher = true;
+      }
+      if (switcher) {
+        y += widget.SlotsMeaning[x[x.length - 1]][i];
+      }
+    }
+    return s + y;
+  }
+
+  List<SingleButtonBlock> ListOfBlocksBuilder(List listOfAllData) {
+    int sequentialIndex=0;
+    int counter = 0;
+    List<SingleButtonBlock> listOfBlocks = [];
+    for (int i = 0; i < 16; i++) {
+      if (listOfAllData != null &&
+          counter < listOfAllData.length &&
+          i == listOfAllData[counter]['slots'][0]) {
+        i += listOfAllData[counter]['slots'].length - 1;
+
+        listOfBlocks.add(SingleButtonBlock(
+          sequentialIndex: sequentialIndex,
+          slotMeaning: slotsMeaningGiver(listOfAllData[counter]['slots']),
+          scale: listOfAllData[counter]['slots'].length,
+          slots: listOfAllData[counter]['slots'],
+          name: listOfAllData[counter]['nameOfCustomer'],
+          phoneNumber: listOfAllData[counter]['phoneNumberOfCustomer'],
+          Reserved: true,
+        ));
+        counter++;
+        sequentialIndex++;
+      } else {
+        listOfBlocks.add(SingleButtonBlock(
+          sequentialIndex: sequentialIndex,
+            slotMeaning: widget.SlotsMeaning[i],
+            scale: 1,
+            slots: listProviderForNumbersBiggerThan9(i),
+            Reserved: false));
+        sequentialIndex++;
+      }
+    }
+    return listOfBlocks;
   }
 
   final FirestoreService _firestoreService = FirestoreService();
@@ -144,66 +202,32 @@ class _SlotsState extends State<Slots> {
                 ),
               ),
               StreamBuilder(
-                initialData: null,
-                stream: RealTimeDBService().streamValueOfUserData(0),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    print('Stream changed');
-                    Map allData = snapshot.data.snapshot.value;
-                    int numberOfSlotsRemoved = 0;
+                  initialData: null,
+                  stream: RealTimeDBService().streamValueOfUserData(0),
+                  builder: (context, snapshot) {
                     List listOfAllData;
-                    if (allData != null) {
-                      listOfAllData = allData.values.toList();
-                      allData.forEach((key, value) {
-                        numberOfSlotsRemoved += value["slots"].length - 1;
-                      });
-                    }
-                    print(listOfAllData);
-                    int shifterAmigo = 0;
-                    return Container(
-                      height: 500,
-                      child: StaggeredGridView.countBuilder(
-                          physics: NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 50, horizontal: 65),
-                          scrollDirection: Axis.horizontal,
-                          staggeredTileBuilder: (index) => StaggeredTile.count(
-                              1 * scaleFunctions(index, listOfAllData), 2.8),
-                          crossAxisCount: 5,
-                          crossAxisSpacing: 10.0,
-                          mainAxisSpacing: 10.0,
-                          itemCount: 16 - numberOfSlotsRemoved,
-                          itemBuilder: (ctx, index) {
-                            if (listOfAllData != null &&
-                                index < listOfAllData.length &&
-                                index + shifterAmigo ==
-                                    listOfAllData[index]['slots'][0]) {
-                              shifterAmigo +=
-                                  listOfAllData[index]['slots'].length - 1;
+                    int numberOfSlotsRemoved = 0;
+                    if (snapshot.hasData) {
+                      print('Stream changed');
+                      Map allData = snapshot.data.snapshot.value;
 
-                              return SingleButtonBlock(
-                                slot: widget.SlotsMeaning[index],
-                                scale: listOfAllData[index]['slots'].length,
-                                slots: listOfAllData[index]['slots'],
-                                name: listOfAllData[index]['nameOfCustomer'],
-                                phoneNumber: listOfAllData[index]
-                                    ['phoneNumberOfCustomer'],
-                                Reserved: true,
-                              );
-                            } else {
-                              return SingleButtonBlock(
-                                  slot: widget.SlotsMeaning[index],
-                                  scale: 1,
-                                  slots: listProviderForNumbersBiggerThan9(
-                                      index + shifterAmigo),
-                                  Reserved: false);
-                            }
-                          }),
-                    );
-                  }
-                  return Text("data");
-                },
-              ),
+                      if (allData != null) {
+                        listOfAllData = allData.values.toList();
+                        print(listOfAllData);
+
+                      }
+                    }
+                    return Container(
+                        //color: Colors.blueGrey,
+                        height: 500,
+                        width: 1000,
+                        child: Wrap(
+                          spacing: 10.0,
+                          runSpacing: 10.0,
+                          direction: Axis.vertical,
+                          children: ListOfBlocksBuilder(listOfAllData),
+                        ));
+                  })
             ]));
   }
 }
