@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
-
+import 'package:provider/provider.dart';
 import 'Slots.dart';
 
 class SingleButtonBlock extends StatefulWidget {
@@ -13,6 +15,7 @@ class SingleButtonBlock extends StatefulWidget {
   final String name;
   final String phoneNumber;
   final bool Reserved;
+  final bool Arrived;
 
   const SingleButtonBlock(
       {this.sequentialIndex,
@@ -21,77 +24,146 @@ class SingleButtonBlock extends StatefulWidget {
       this.slots,
       this.name,
       this.phoneNumber,
-      this.Reserved});
+      this.Reserved,
+      this.Arrived});
 
   @override
   _SingleButtonBlockState createState() => _SingleButtonBlockState();
 }
 
 class _SingleButtonBlockState extends State<SingleButtonBlock> {
-  static ValueNotifier<List> enteredValue = ValueNotifier([]);
-
   //not selected in first
   bool selected = false;
   RealTimeDBService rt = RealTimeDBService();
   Color backgroundColorSwitch = Colors.greenAccent[400];
+  static ValueNotifier<List> enteredValue = ValueNotifier([]);
 
   @override
   void initState() {
-    selected = false;
+    enteredValue.value = [];
+    Slots.arr = [];
     super.initState();
   }
 
+  //this function will return a check box if reserved
 
+  Color buttonColorSwitch(newVal) {
+    for (int i = 0; i < newVal.length; i++) {
+      if (widget.sequentialIndex == newVal[i]) {
+        return Colors.yellowAccent[400];
+      }
+    }
+    return Colors.greenAccent[400];
+  }
 
   @override
   Widget build(BuildContext context) {
+    var providerHolder = context.watch<ProvidersModel>();
+    print(providerHolder.slotsOfThisReservationToConfirmArrival);
+
+    Widget checkIfReservedToGetCheckBox() {
+      if (widget.Arrived) {
+        return Checkbox(value: true);
+      } else if (widget.Reserved) {
+        bool starter = false;
+        if (context
+            .read<ProvidersModel>()
+            .slotsOfThisReservationToConfirmArrival
+            .contains(widget.slots)) {
+          starter = true;
+          return Checkbox(
+              value: starter,
+              onChanged: (bool value) {
+                setState(() {
+                  providerHolder.slotsOfThisReservationToConfirmArrival
+                      .remove(widget.slots);
+                });
+                print(context
+                    .read<ProvidersModel>()
+                    .slotsOfThisReservationToConfirmArrival);
+              });
+        } else {
+          return Checkbox(
+              value: starter,
+              onChanged: (bool value) {
+                setState(() {
+                  print(widget.slots);
+                  providerHolder.slotsOfThisReservationToConfirmArrival
+                      .add(widget.slots);
+                  value = !value;
+                  print(context
+                      .read<ProvidersModel>()
+                      .slotsOfThisReservationToConfirmArrival);
+                });
+              });
+        }
+      } else
+        return Container();
+    }
+
+    Slots.arr = [];
+
     return Container(
       // margin:
       //     const EdgeInsets.only(top: 15.0, bottom: 15.0, left: 5.0, right: 5.0),
-      child: ElevatedButton(
-
-        child:ValueListenableBuilder(
-            valueListenable: enteredValue,
-            builder: (context, newVal, child) {
-              for(int i = 0;i<newVal.length;i++){
-                if(widget.sequentialIndex==newVal[i]){
-                  print(widget.sequentialIndex);
+      child: ValueListenableBuilder(
+        valueListenable: enteredValue,
+        builder: (context, newVal, child) {
+          for (int i = 0; i < newVal.length; i++) {
+            if (widget.sequentialIndex == newVal[i]) {
+              Slots.arr.add(widget.slots);
+              print(Slots.arr);
+              break;
+            }
+          }
+          return ElevatedButton(
+            child: Wrap(
+              direction: Axis.horizontal,
+              children: [
+                Wrap(
+                  direction: Axis.vertical,
+                  alignment: WrapAlignment.center,
+                  children: nameAndPhoneShower(
+                      widget.name, widget.phoneNumber, widget.slotMeaning),
+                ),
+                checkIfReservedToGetCheckBox(),
+              ],
+            ),
+            onPressed: () {
+              Slots.arr = [];
+              if (enteredValue.value.isEmpty) {
+                enteredValue.value = [widget.sequentialIndex];
+              } else {
+                if (widget.sequentialIndex < enteredValue.value[0]) {
+                  enteredValue.value = [enteredValue.value[0]];
+                } else if (widget.sequentialIndex == enteredValue.value[0]) {
+                  enteredValue.value = [];
+                } else {
+                  int difference =
+                      widget.sequentialIndex - enteredValue.value[0];
+                  if (difference < 3) {
+                    List temp = enteredValue.value;
+                    enteredValue.value = [];
+                    for (int i = temp[0]; i < temp[0] + difference + 1; i++) {
+                      enteredValue.value.add(i);
+                    }
+                  } else {
+                    List temp = enteredValue.value;
+                    enteredValue.value = [];
+                    for (int i = temp[0]; i < temp[0] + 3; i++) {
+                      enteredValue.value.add(i);
+                    }
+                  }
                 }
               }
-              return Wrap(
-                direction: Axis.vertical,
-                alignment: WrapAlignment.center,
-                children: nameAndPhoneShower(
-                    widget.name, widget.phoneNumber, widget.slotMeaning),
-              );
-            }) ,
-        onPressed: () {
-
-          if (!selected) {
-            enteredValue.value.add(widget.sequentialIndex);
-
-
-            Slots.arr.add(widget.slots);
-            selected = !selected;
-            setState(() {
-              backgroundColorSwitch = Colors.yellowAccent;
-            });
-            print(Slots.arr);
-          } else {
-            Slots.arr.remove(widget.slots);
-
-            selected = !selected;
-            setState(() {
-              backgroundColorSwitch = Colors.greenAccent[400];
-            });
-            print(Slots.arr);
-          }
-
+              print(enteredValue.value);
+            },
+            style: ElevatedButton.styleFrom(
+              primary: buttonColorSwitch(newVal),
+              minimumSize: Size(328.0, 80.0 * widget.scale),
+            ),
+          );
         },
-        style: ElevatedButton.styleFrom(
-          primary: backgroundColorSwitch,
-          minimumSize: Size(328.0, 68.0 * widget.scale),
-        ),
       ),
     );
   }

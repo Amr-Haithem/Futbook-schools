@@ -11,10 +11,22 @@ import 'package:futbook_school/Pages/Screens/Slots/Slots.dart';
 import 'package:provider/provider.dart';
 
 class RealTimeDBService {
+  String listProviderForNumbersBiggerThan9(int theNumber) {
+    List<String> chars = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    if (theNumber > 9) {
+      return chars[theNumber - 10] + theNumber.toString();
+    } else {
+      return theNumber.toString();
+    }
+  }
+
   final databaseReference = FirebaseDatabase.instance.reference();
 
-  Future<bool> checkInstantlyIfReserved(String schoolUser,
-      int requestedFieldIndex, List requestedSlotsIndices) async {
+  Future<bool> checkInstantlyIfReserved(
+      String schoolUser,
+      int requestedFieldIndex,
+      List requestedSlotsIndices,
+      String dayIndex) async {
     bool availability = true;
     for (int i = 0; i < requestedSlotsIndices.length; i++) {
       await databaseReference
@@ -22,7 +34,7 @@ class RealTimeDBService {
           //will be replaced by user from email
           .child("UndefinedSchool")
           .child(requestedFieldIndex.toString())
-          .child("day0")
+          .child(dayIndex)
           .child(requestedSlotsIndices[i][0].toString())
           .once()
           .then((DataSnapshot dss) {
@@ -53,18 +65,18 @@ class RealTimeDBService {
   }
 
   Future<bool> updateReservationData(
-      User user, int fieldIndex, List slotIndices) async {
+      User user, int fieldIndex, List slotIndices, String dayIndex) async {
     print(getUserNameFromEmailAddress(user.email));
 
-    if (await checkInstantlyIfReserved(
-        getUserNameFromEmailAddress(user.email), fieldIndex, slotIndices)) {
+    if (await checkInstantlyIfReserved(getUserNameFromEmailAddress(user.email),
+        fieldIndex, slotIndices, dayIndex)) {
       for (int i = 0; i < slotIndices.length; i++) {
         await databaseReference
             .child("Reservation_Data")
             //will be replaced by user from email
             .child("UndefinedSchool")
             .child(fieldIndex.toString())
-            .child("day0")
+            .child(dayIndex)
             .update(
                 {returningTheActualSlots(slotIndices[i][0].toString()): true});
       }
@@ -87,7 +99,7 @@ class RealTimeDBService {
   }
 
   Future<bool> UpdateUserData(User user, int fieldIndex, List slotIndices,
-      String nameOfClient, String phoneNumber) async {
+      String nameOfClient, String phoneNumber, String dayIndex) async {
     for (int i = 0; i < slotIndices.length; i++) {
       //updating User data "the data of reservation"
       await databaseReference
@@ -95,7 +107,7 @@ class RealTimeDBService {
           //will be replaced by user from email
           .child("UndefinedSchool")
           .child(fieldIndex.toString())
-          .child("day0")
+          .child(dayIndex)
           .child(slotIndices[0][0].toString() +
               '-' +
               slotIndices[slotIndices.length - 1][0].toString())
@@ -135,26 +147,33 @@ class RealTimeDBService {
 
 //listener function to listen to slots changed in a particular day in a particular field
 //this listener downloads one kilo bytes each time it downloads data
-  Stream streamValueOfUserData(int fieldIndex) {
+  Stream streamValueOfUserData(int fieldIndex, String dayIndex) {
     return FirebaseDatabase.instance
         .reference()
         .child("User data")
         .child("UndefinedSchool")
         .child(fieldIndex.toString())
-        .child("day0")
+        .child(dayIndex)
         //todo take a look if to change on vlaue
         .onValue;
   }
 
-//remove a certain listener
-  void removeListener() {
-    // databaseReference.removeEventListener(valueEventListener);
+  Future<void> updatingArrivedReservations(String schoolUser,
+      int requestedFieldIndex, List reservationKeys, String dayIndex) async {
+    for (int i = 0; i < reservationKeys.length; i++) {
+      await databaseReference
+          .child("User data")
+          //will be replaced by user from email
+          .child("UndefinedSchool")
+          .child(requestedFieldIndex.toString())
+          .child(dayIndex)
+          .child(listProviderForNumbersBiggerThan9(reservationKeys[i][0]) +
+              '-' +
+              listProviderForNumbersBiggerThan9(
+                  reservationKeys[i][reservationKeys[i].length - 1]))
+          .update({'arrived': true});
+    }
   }
-
-/*FirebaseDatabase.instance.reference().child("Reservation_Data")
-        .child("UndefinedSchool")
-        .child(fieldIndex.toString())
-        .child("day0")*/
 
 //functional methods (not database related):
 
