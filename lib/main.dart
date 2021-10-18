@@ -1,5 +1,4 @@
 import 'dart:ffi';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +26,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-
         providers: [
           Provider<ProvidersModel>(
             create: (context) => ProvidersModel(
@@ -36,6 +34,7 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           StreamProvider<User>.value(
+            initialData: null,
             value: AuthService().user,
           )
         ],

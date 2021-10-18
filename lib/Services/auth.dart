@@ -1,15 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:futbook_school/Models/CustomUser.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   //tracks whenever the user changes authentication state and send it to the main.dart
   Stream<User> get user {
-    return _auth
-        .authStateChanges()
-        .map((User user)=>user);
+    return _auth.authStateChanges().map((User user) => user);
   }
+
   Future SignInAnon() async {
     try {
       UserCredential result = await _auth.signInAnonymously();
@@ -20,6 +18,7 @@ class AuthService {
       return null;
     }
   }
+
   //sign out
   Future signOut() async {
     try {
@@ -29,18 +28,21 @@ class AuthService {
       return null;
     }
   }
-  Future register(String email,String password) async {
+
+  Future register(String email, String password) async {
     try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
     } catch (e) {
       print("error in registering with email and password");
     }
   }
-  Future signInWithEmailAndPass(String email,String password) async {
-    try{
+
+  Future signInWithEmailAndPass(String email, String password) async {
+    try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-    }
-    catch(e){
+    } catch (e) {
+      print(e);
       print("failed to sign in with email and password");
     }
   }

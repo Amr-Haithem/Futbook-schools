@@ -173,3 +173,49 @@ List.generate(
                                /*allData.forEach((key, value) {
                                                          numberOfSlotsRemoved += value["slots"].length - 1;
                                                        });*/
+
+
+
+
+                   /*
+                         await schoolsList.get().then((value) {
+                           value.docs.forEach((element) {
+                             print(element.data());
+                           });
+                         });
+                       */
+
+
+                 //this function will extract me each length of the data begotten from the db
+
+                   int scaleFunctions(int i, List listOfAllData) {
+
+                     if (i == 0) {
+                       shifterHelper = 0;
+                     }
+
+                     if (listOfAllData != null &&
+                         i < listOfAllData.length &&
+                         i + shifterHelper == listOfAllData[i]['slots'][0]) {
+                       shifterHelper += listOfAllData[i]['slots'].length - 1;
+                       return listOfAllData[i]['slots'].length;
+                     } else {
+                       return 1;
+                     }
+                   }
+
+
+                   //confirm button of slots
+                   /*
+                    TextButton(
+                      child: Text('confirm'),
+                      onPressed: () async {
+                        rt.updatingArrivedReservations(
+                            'schoolUser',
+                            args.indexOfThisField,
+                            context
+                                .read<ProvidersModel>()
+                                .slotsOfThisReservationToConfirmArrival,
+                            daysArray[currentDayIndex]);
+                      },
+                    ),*/

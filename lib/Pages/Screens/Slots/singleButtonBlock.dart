@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:futbook_school/Models/DataWithNameAndPhoneNumber.dart';
 import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,8 @@ class SingleButtonBlock extends StatefulWidget {
   final String phoneNumber;
   final bool Reserved;
   final bool Arrived;
+  final String Day;
+  final int Field;
 
   const SingleButtonBlock(
       {this.sequentialIndex,
@@ -25,7 +28,9 @@ class SingleButtonBlock extends StatefulWidget {
       this.name,
       this.phoneNumber,
       this.Reserved,
-      this.Arrived});
+      this.Arrived,
+      this.Day,
+      this.Field});
 
   @override
   _SingleButtonBlockState createState() => _SingleButtonBlockState();
@@ -50,17 +55,15 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   Color buttonColorSwitch(newVal) {
     for (int i = 0; i < newVal.length; i++) {
       if (widget.sequentialIndex == newVal[i]) {
-        return Colors.yellowAccent[400];
+        return Colors.yellowAccent;
       }
     }
-    return Colors.greenAccent[400];
+    return Colors.lightGreenAccent[400];
   }
 
   @override
   Widget build(BuildContext context) {
     var providerHolder = context.watch<ProvidersModel>();
-    print(providerHolder.slotsOfThisReservationToConfirmArrival);
-
     Widget checkIfReservedToGetCheckBox() {
       if (widget.Arrived) {
         return Checkbox(value: true);
@@ -104,8 +107,6 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     Slots.arr = [];
 
     return Container(
-      // margin:
-      //     const EdgeInsets.only(top: 15.0, bottom: 15.0, left: 5.0, right: 5.0),
       child: ValueListenableBuilder(
         valueListenable: enteredValue,
         builder: (context, newVal, child) {
@@ -123,42 +124,52 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
                 Wrap(
                   direction: Axis.vertical,
                   alignment: WrapAlignment.center,
-                  children: nameAndPhoneShower(
-                      widget.name, widget.phoneNumber, widget.slotMeaning),
+                  children: nameAndPhoneShower(widget.name, widget.slotMeaning),
                 ),
                 checkIfReservedToGetCheckBox(),
               ],
             ),
             onPressed: () {
-              Slots.arr = [];
-              if (enteredValue.value.isEmpty) {
-                enteredValue.value = [widget.sequentialIndex];
+              if (widget.Reserved) {
+                Navigator.pushNamed(context, '/Invoice',
+                    arguments: DataWithNameAndPhoneNumber(
+                        nameOfCustomer: widget.name,
+                        PhoneNumber: widget.phoneNumber,
+                        indexOfThisField: widget.Field + 1,
+                        slotsMeaning: widget.slotMeaning,
+                        Day: widget.Day));
               } else {
-                if (widget.sequentialIndex < enteredValue.value[0]) {
-                  enteredValue.value = [enteredValue.value[0]];
-                } else if (widget.sequentialIndex == enteredValue.value[0]) {
-                  enteredValue.value = [];
+                Slots.arr = [];
+                if (enteredValue.value.isEmpty) {
+                  enteredValue.value = [widget.sequentialIndex];
                 } else {
-                  int difference =
-                      widget.sequentialIndex - enteredValue.value[0];
-                  if (difference < 3) {
-                    List temp = enteredValue.value;
+                  if (widget.sequentialIndex < enteredValue.value[0]) {
+                    enteredValue.value = [enteredValue.value[0]];
+                  } else if (widget.sequentialIndex == enteredValue.value[0]) {
                     enteredValue.value = [];
-                    for (int i = temp[0]; i < temp[0] + difference + 1; i++) {
-                      enteredValue.value.add(i);
-                    }
                   } else {
-                    List temp = enteredValue.value;
-                    enteredValue.value = [];
-                    for (int i = temp[0]; i < temp[0] + 3; i++) {
-                      enteredValue.value.add(i);
+                    int difference =
+                        widget.sequentialIndex - enteredValue.value[0];
+                    if (difference < 3) {
+                      List temp = enteredValue.value;
+                      enteredValue.value = [];
+                      for (int i = temp[0]; i < temp[0] + difference + 1; i++) {
+                        enteredValue.value.add(i);
+                      }
+                    } else {
+                      List temp = enteredValue.value;
+                      enteredValue.value = [];
+                      for (int i = temp[0]; i < temp[0] + 3; i++) {
+                        enteredValue.value.add(i);
+                      }
                     }
                   }
                 }
+                print(enteredValue.value);
               }
-              print(enteredValue.value);
             },
             style: ElevatedButton.styleFrom(
+              side: BorderSide(width: 1, color: Colors.black),
               primary: buttonColorSwitch(newVal),
               minimumSize: Size(328.0, 80.0 * widget.scale),
             ),
@@ -168,17 +179,12 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     );
   }
 
-  List<Text> nameAndPhoneShower(String x, String y, String z) {
+  List<Text> nameAndPhoneShower(String x, String z) {
     List<Text> textList = [];
 
-    if (x != null && y != null) {
+    if (x != null) {
       textList.add(Text(
         x,
-        style: TextStyle(
-            color: Colors.grey[900], fontFamily: "Cairo", fontSize: 24),
-      ));
-      textList.add(Text(
-        y,
         style: TextStyle(
             color: Colors.grey[900], fontFamily: "Cairo", fontSize: 24),
       ));

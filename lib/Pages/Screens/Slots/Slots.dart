@@ -14,21 +14,25 @@ class Slots extends StatefulWidget {
     '8 AM - 9 AM',
     '9 AM - 10 AM',
     '10 AM - 11 AM',
-    '11 AM - 12 AM',
+    '11 AM - 12 PM',
     '12 PM - 1 PM',
     '1 PM - 2 PM',
     '2 PM - 3 PM',
     '3 PM - 4 PM',
     '4 PM - 5 PM',
     '5 PM - 6 PM',
-    '6 PM - 8 PM',
+    '6 PM - 7 PM',
+    '7 PM - 8 PM',
     '8 PM - 9 PM',
     '9 PM - 10 PM',
     '10 PM - 11 PM',
-    '12 PM - 1 AM',
+    '11 PM - 12 AM',
+    '12 AM - 1 AM',
     '1 AM - 2 AM',
     '2 AM - 3 AM',
+    '3 AM - 4 AM',
     '4 AM - 5 AM',
+    '5 AM - 6 AM',
     '6 AM - 7 AM',
     '7 AM - 8 AM',
   ];
@@ -42,23 +46,6 @@ class Slots extends StatefulWidget {
 
 class _SlotsState extends State<Slots> {
   int shifterHelper;
-
-//this function will extract me each length of the data begotten from the db
-
-  int scaleFunctions(int i, List listOfAllData) {
-    if (i == 0) {
-      shifterHelper = 0;
-    }
-
-    if (listOfAllData != null &&
-        i < listOfAllData.length &&
-        i + shifterHelper == listOfAllData[i]['slots'][0]) {
-      shifterHelper += listOfAllData[i]['slots'].length - 1;
-      return listOfAllData[i]['slots'].length;
-    } else {
-      return 1;
-    }
-  }
 
   //the following function returns 'a' for example after a number bigger than 9
   List listProviderForNumbersBiggerThan9(int theNumber) {
@@ -90,11 +77,26 @@ class _SlotsState extends State<Slots> {
     return s + y;
   }
 
-  List<SingleButtonBlock> ListOfBlocksBuilder(List listOfAllData) {
+  Future<List<SingleButtonBlock>> ListOfBlocksBuilder(
+      List listOfAllData) async {
+    int startTime =
+        await _firestoreService.getThisSchoolDataStartTime('schoolDocName');
+
+    int endTime =
+        await _firestoreService.getThisSchoolDataEndTime('schoolDocName');
+    startTime -= 8;
+    endTime -= 8;
+    if (startTime < 0) {
+      startTime += 24;
+    }
+    ;
+    if (endTime < 0) {
+      endTime += 24;
+    }
     int sequentialIndex = 0;
     int counter = 0;
     List<SingleButtonBlock> listOfBlocks = [];
-    for (int i = 0; i < 16; i++) {
+    for (int i = startTime; i < endTime; i++) {
       if (listOfAllData != null &&
           counter < listOfAllData.length &&
           i == listOfAllData[counter]['slots'][0]) {
@@ -108,7 +110,12 @@ class _SlotsState extends State<Slots> {
           name: listOfAllData[counter]['nameOfCustomer'],
           phoneNumber: listOfAllData[counter]['phoneNumberOfCustomer'],
           Reserved: true,
-          Arrived:  listOfAllData[counter]['arrived'] == null ? false : true,
+          Arrived: listOfAllData[counter]['arrived'] == null ||
+                  listOfAllData[counter]['arrived'] == false
+              ? false
+              : true,
+          Day: daysArray[currentDayIndex],
+          Field: args.indexOfThisField,
         ));
         counter++;
         sequentialIndex++;
@@ -145,6 +152,9 @@ class _SlotsState extends State<Slots> {
 
   //code of the slider
   List daysArray = ["day0", "day1", "day2", "day3", "day4", "day5", "day6"];
+  /*
+  http resopncse gdedddn
+  */
   int currentDayIndex = 0;
   int numberOfFields = 7;
   bool _isButton1Disabled = true;
@@ -182,6 +192,37 @@ class _SlotsState extends State<Slots> {
       };
   }
 
+  Widget backToFiledsOrCancelButton() {
+    if (false) {
+      return SizedBox(
+        width: 125,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              primary: Colors.red[700],
+              textStyle: TextStyle(
+                fontSize: 35,
+              )),
+          child: Text("إلغاء"),
+          onPressed: () async {},
+        ),
+      );
+    } else {
+      return MaterialButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        color: Colors.white,
+        textColor: Colors.black,
+        child: Icon(
+          Icons.arrow_back_ios_new_sharp,
+          size: 27,
+        ),
+        padding: EdgeInsets.all(16),
+        shape: CircleBorder(),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Slots.arr = [];
@@ -189,120 +230,187 @@ class _SlotsState extends State<Slots> {
     //TODO to ensure null-safety put an ! after (context)
 
     return Scaffold(
+        /*
         appBar: AppBar(
           backgroundColor: Colors.blue,
           title: Text('Slots page'),
-        ),
-        body: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Row(
+        ),*/
+        body: Container(
+      color: Colors.grey[100],
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //chose between two button
+
+                backToFiledsOrCancelButton(),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TextButton(
-                      child: Text('confirm'),
-                      onPressed: () {
-                        rt.updatingArrivedReservations(
-                            'schoolUser',
-                            args.indexOfThisField,
-                            context
-                                .read<ProvidersModel>()
-                                .slotsOfThisReservationToConfirmArrival,
-                            daysArray[currentDayIndex]);
-                        print(context
-                            .read<ProvidersModel>()
-                            .slotsOfThisReservationToConfirmArrival);
-                      },
+                    Text(
+                      (args.indexOfThisField + 1).toString() + ' ملعب',
+                      style: TextStyle(fontFamily: "Cairo", fontSize: 42),
                     ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          primary: Colors.white,
-                          backgroundColor: Colors.blueGrey,
-                          textStyle: TextStyle(
-                            fontSize: 40,
-                          )),
-                      child: Text("Reserve"),
-                      onPressed: () async {
-                        if (await rt.updateReservationData(
-                            args.user,
-                            args.indexOfThisField,
-                            Slots.arr,
-                            daysArray[currentDayIndex])) {
-                          Navigator.pushNamed(context, '/CustomerInfo',
-                              arguments: DataWithoutNameAndPhoneNumber(
-                                  user: args.user,
-                                  indexOfThisField: args.indexOfThisField,
-                                  slotsReserved: Slots.arr,
-                                  dayIndex: daysArray[currentDayIndex]));
-                        } else {
-                          print("didn't register : a message from slots page");
-                        }
-                      },
-                    ),
+                    Text('data',
+                        style: TextStyle(fontFamily: "Cairo", fontSize: 30)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          onPressed: isBackButtonEnabled(),
-                          icon: Icon(Icons.arrow_back),
+                        //isForwardButtonEnabled()
+                        Container(
+                          width: 50,
+                          height: 30,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.grey[700]),
+                            onPressed: isBackButtonEnabled(),
+                            child: IconButton(
+                              color: Colors.grey,
+                              icon: Transform.translate(
+                                offset: Offset(-10, -4),
+                                child: Icon(
+                                  Icons.arrow_back_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        Text(daysArray[currentDayIndex]),
-                        IconButton(
-                          onPressed: isForwardButtonEnabled(),
-                          icon: Icon(Icons.arrow_forward),
+                        SizedBox(width: 15),
+                        Text(
+                          daysArray[currentDayIndex],
+                          style: TextStyle(fontFamily: 'Cairo', fontSize: 30),
+                        ),
+                        SizedBox(width: 15),
+                        Container(
+                          width: 50,
+                          height: 30,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.grey[700]),
+                            onPressed: isForwardButtonEnabled(),
+                            child: IconButton(
+                              color: Colors.grey[800],
+                              icon: Transform.translate(
+                                offset: Offset(-10, -4),
+                                child: Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          primary: Colors.white,
-                          backgroundColor: Colors.blueGrey,
-                          textStyle: TextStyle(
-                            fontSize: 40,
-                          )),
-                      child: Text("Un Reserve"),
-                      onPressed: () async {
-                        await rt.unReserveSlots(
-                            args.user, args.indexOfThisField, Slots.arr);
-                        Slots.arr = [];
-                      },
-                    )
                   ],
                 ),
-              ),
-              StreamBuilder(
-                  initialData: null,
-                  //here we can use provider along with sliderOfDays class to update the state
-                  stream: RealTimeDBService().streamValueOfUserData(
-                      args.indexOfThisField,
-                      daysArray[
-                          currentDayIndex] /*SliderOfDays().daysArray[0]*/),
-                  builder: (context, snapshot) {
-                    List listOfAllData;
-                    if (snapshot.hasData) {
-                      print('Stream changed');
-                      Map allData = snapshot.data.snapshot.value;
+                Column(children: [
+                  //choose between two buttons
+                  ReserveButton(
+                      rt: rt,
+                      args: args,
+                      daysArray: daysArray,
+                      currentDayIndex: currentDayIndex)
+                ])
+              ],
+            ),
 
-                      if (allData != null) {
-                        listOfAllData = allData.values.toList();
-                        print(listOfAllData);
+            /*SizedBox(
+              height: 50,
+            ),*/
+            StreamBuilder(
+              initialData: null,
+              stream: _firestoreService.listenToDataFromSchoolList('schoolId'),
+              builder: (context, snapshot1) {
+                return StreamBuilder(
+                    //here we can use provider along with sliderOfDays class to update the state
+                    stream: RealTimeDBService().streamValueOfUserData(
+                        args.indexOfThisField, daysArray[currentDayIndex]),
+                    builder: (context, snapshot) {
+                      List listOfAllData;
+                      if (snapshot.hasData) {
+                        print('Stream changed');
+                        Map allData = snapshot.data.snapshot.value;
+
+                        if (allData != null) {
+                          listOfAllData = allData.values.toList();
+                          print(listOfAllData);
+                        }
                       }
-                    }
-                    return Container(
-                        //color: Colors.blueGrey,
-                        height: 500,
-                        width: 1000,
-                        child: Wrap(
-                          spacing: 10.0,
-                          runSpacing: 10.0,
-                          direction: Axis.vertical,
-                          children: ListOfBlocksBuilder(listOfAllData),
-                        ));
-                  })
-            ]));
+                      return Container(
+                          //color: Colors.blueGrey,
+                          height: 500,
+                          width: 1000,
+                          child: FutureBuilder(
+                            future: ListOfBlocksBuilder(listOfAllData),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.done) {
+                                return Wrap(
+                                  spacing: 10.0,
+                                  runSpacing: 10.0,
+                                  direction: Axis.vertical,
+                                  children: snapshot.data,
+                                );
+                              } else {
+                                return Container(
+                                    child: CircularProgressIndicator());
+                              }
+                            },
+                          ));
+                    });
+              },
+            )
+          ]),
+    ));
+  }
+}
+
+class ReserveButton extends StatelessWidget {
+  const ReserveButton({
+    Key key,
+    @required this.rt,
+    @required this.args,
+    @required this.daysArray,
+    @required this.currentDayIndex,
+  }) : super(key: key);
+
+  final RealTimeDBService rt;
+  final DataOfUserAndFieldIndexOnly args;
+  final List daysArray;
+  final int currentDayIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 125,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+            primary: Colors.blue[700],
+            textStyle: TextStyle(
+              fontSize: 35,
+            )),
+        child: Text("احجز"),
+        onPressed: () async {
+          if (await rt.updateReservationData(args.user, args.indexOfThisField,
+              Slots.arr, daysArray[currentDayIndex])) {
+            Navigator.pushNamed(context, '/CustomerInfo',
+                arguments: DataWithoutNameAndPhoneNumber(
+                    user: args.user,
+                    indexOfThisField: args.indexOfThisField,
+                    slotsReserved: Slots.arr,
+                    dayIndex: daysArray[currentDayIndex]));
+          } else {
+            print("didn't register : a message from slots page");
+          }
+        },
+      ),
+    );
   }
 }

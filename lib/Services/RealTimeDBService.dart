@@ -1,8 +1,7 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:io';
-
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,7 +18,6 @@ class RealTimeDBService {
       return theNumber.toString();
     }
   }
-
   final databaseReference = FirebaseDatabase.instance.reference();
 
   Future<bool> checkInstantlyIfReserved(

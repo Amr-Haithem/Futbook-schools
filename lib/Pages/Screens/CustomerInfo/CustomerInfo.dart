@@ -106,14 +106,6 @@ class _CustomerInfoState extends State<CustomerInfo> {
                               NameOfCustomer,
                               PhoneNumber,
                               args.dayIndex);
-                          //sending to invoice to show data
-                          Navigator.pushNamed(context, '/Invoice',
-                              arguments: DataWithNameAndPhoneNumber(
-                                  nameOfCustomer: NameOfCustomer,
-                                  PhoneNumber: PhoneNumber,
-                                  user: args.user,
-                                  indexOfThisField: args.indexOfThisField,
-                                  slotsReserved: args.slotsReserved));
                         }
                       },
                     )
