@@ -37,7 +37,6 @@ class SingleButtonBlock extends StatefulWidget {
 }
 
 class _SingleButtonBlockState extends State<SingleButtonBlock> {
-  //not selected in first
   bool selected = false;
   RealTimeDBService rt = RealTimeDBService();
   Color backgroundColorSwitch = Colors.greenAccent[400];
@@ -46,65 +45,79 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   @override
   void initState() {
     enteredValue.value = [];
-    Slots.arr = [];
+    context.read<ProvidersModel>().slotsToBeReserved = [];
     super.initState();
   }
 
   //this function will return a check box if reserved
 
   Color buttonColorSwitch(newVal) {
+    if (widget.Arrived) {
+      return Colors.grey[600];
+    } else if (widget.Reserved) {
+      return Colors.grey[400];
+    }
     for (int i = 0; i < newVal.length; i++) {
       if (widget.sequentialIndex == newVal[i]) {
+        //here i start
+
+        //context.watch<ProvidersModel>().somethingSelected = true;
+        //print(context.read<ProvidersModel>().somethingSelected);
         return Colors.yellowAccent;
       }
     }
+
+    //context.watch<ProvidersModel>().somethingSelected = false;
+
     return Colors.lightGreenAccent[400];
+  }
+
+  Widget ifArrivedPutCashSignAndLock() {
+    if (widget.Arrived) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          MaterialButton(
+            onPressed: () {},
+            color: Colors.grey[800],
+            textColor: Colors.grey[350],
+            child: Icon(
+              Icons.attach_money_rounded,
+              size: 20,
+            ),
+            shape: CircleBorder(),
+          ),
+          MaterialButton(
+            onPressed: () {},
+            color: Colors.grey[800],
+            textColor: Colors.grey[350],
+            child: Icon(
+              Icons.lock,
+              size: 20,
+            ),
+            shape: CircleBorder(),
+          )
+        ],
+      );
+    } else {
+      return SizedBox();
+    }
+  }
+
+  Widget checkboxIfSelected(newVal) {
+    for (int i = 0; i < newVal.length; i++) {
+      if (widget.sequentialIndex == newVal[i]) {
+        return Checkbox(value: true);
+      }
+    }
+
+    return SizedBox();
   }
 
   @override
   Widget build(BuildContext context) {
-    var providerHolder = context.watch<ProvidersModel>();
-    Widget checkIfReservedToGetCheckBox() {
-      if (widget.Arrived) {
-        return Checkbox(value: true);
-      } else if (widget.Reserved) {
-        bool starter = false;
-        if (context
-            .read<ProvidersModel>()
-            .slotsOfThisReservationToConfirmArrival
-            .contains(widget.slots)) {
-          starter = true;
-          return Checkbox(
-              value: starter,
-              onChanged: (bool value) {
-                setState(() {
-                  providerHolder.slotsOfThisReservationToConfirmArrival
-                      .remove(widget.slots);
-                });
-                print(context
-                    .read<ProvidersModel>()
-                    .slotsOfThisReservationToConfirmArrival);
-              });
-        } else {
-          return Checkbox(
-              value: starter,
-              onChanged: (bool value) {
-                setState(() {
-                  print(widget.slots);
-                  providerHolder.slotsOfThisReservationToConfirmArrival
-                      .add(widget.slots);
-                  value = !value;
-                  print(context
-                      .read<ProvidersModel>()
-                      .slotsOfThisReservationToConfirmArrival);
-                });
-              });
-        }
-      } else
-        return Container();
-    }
-
-    Slots.arr = [];
+    context.read<ProvidersModel>().slotsToBeReserved = [];
 
     return Container(
       child: ValueListenableBuilder(
@@ -112,8 +125,11 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
         builder: (context, newVal, child) {
           for (int i = 0; i < newVal.length; i++) {
             if (widget.sequentialIndex == newVal[i]) {
-              Slots.arr.add(widget.slots);
-              print(Slots.arr);
+              context
+                  .read<ProvidersModel>()
+                  .slotsToBeReserved
+                  .add(widget.slots);
+              print(context.read<ProvidersModel>().slotsToBeReserved);
               break;
             }
           }
@@ -121,25 +137,28 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
             child: Wrap(
               direction: Axis.horizontal,
               children: [
-                Wrap(
-                  direction: Axis.vertical,
-                  alignment: WrapAlignment.center,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: nameAndPhoneShower(widget.name, widget.slotMeaning),
                 ),
-                checkIfReservedToGetCheckBox(),
+                ifArrivedPutCashSignAndLock(),
+                checkboxIfSelected(newVal)
               ],
             ),
             onPressed: () {
               if (widget.Reserved) {
                 Navigator.pushNamed(context, '/Invoice',
                     arguments: DataWithNameAndPhoneNumber(
+                        arrived: widget.Arrived,
                         nameOfCustomer: widget.name,
                         PhoneNumber: widget.phoneNumber,
-                        indexOfThisField: widget.Field + 1,
+                        indexOfThisField: widget.Field,
                         slotsMeaning: widget.slotMeaning,
+                        slots: widget.slots,
                         Day: widget.Day));
               } else {
-                Slots.arr = [];
+                context.read<ProvidersModel>().slotsToBeReserved = [];
                 if (enteredValue.value.isEmpty) {
                   enteredValue.value = [widget.sequentialIndex];
                 } else {
@@ -186,13 +205,17 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
       textList.add(Text(
         x,
         style: TextStyle(
-            color: Colors.grey[900], fontFamily: "Cairo", fontSize: 24),
+            color: widget.Arrived ? Colors.white : Colors.grey[900],
+            fontFamily: "Cairo",
+            fontSize: 24),
       ));
     }
     textList.add(Text(
       z,
-      style:
-          TextStyle(color: Colors.grey[900], fontFamily: "Cairo", fontSize: 24),
+      style: TextStyle(
+          color: widget.Arrived ? Colors.white : Colors.grey[900],
+          fontFamily: "Cairo",
+          fontSize: 24),
     ));
     return textList;
   }

@@ -1,7 +1,6 @@
-class ProvidersModel{
+class ProvidersModel {
+  List slotsToBeReserved = [];
+  bool somethingSelected;
 
-  List slotsOfThisReservationToConfirmArrival;
-  List<List<int>> customList;
-
-  ProvidersModel({this.slotsOfThisReservationToConfirmArrival, this.customList});
+  ProvidersModel({this.slotsToBeReserved, this.somethingSelected});
 }

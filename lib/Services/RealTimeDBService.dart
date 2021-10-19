@@ -18,6 +18,7 @@ class RealTimeDBService {
       return theNumber.toString();
     }
   }
+
   final databaseReference = FirebaseDatabase.instance.reference();
 
   Future<bool> checkInstantlyIfReserved(
@@ -157,20 +158,15 @@ class RealTimeDBService {
   }
 
   Future<void> updatingArrivedReservations(String schoolUser,
-      int requestedFieldIndex, List reservationKeys, String dayIndex) async {
-    for (int i = 0; i < reservationKeys.length; i++) {
-      await databaseReference
-          .child("User data")
-          //will be replaced by user from email
-          .child("UndefinedSchool")
-          .child(requestedFieldIndex.toString())
-          .child(dayIndex)
-          .child(listProviderForNumbersBiggerThan9(reservationKeys[i][0]) +
-              '-' +
-              listProviderForNumbersBiggerThan9(
-                  reservationKeys[i][reservationKeys[i].length - 1]))
-          .update({'arrived': true});
-    }
+      int requestedFieldIndex, String reservationKey, String dayIndex) async {
+    await databaseReference
+        .child("User data")
+        //will be replaced by user from email
+        .child("UndefinedSchool")
+        .child(requestedFieldIndex.toString())
+        .child(dayIndex)
+        .child(reservationKey)
+        .update({'arrived': true});
   }
 
 //functional methods (not database related):

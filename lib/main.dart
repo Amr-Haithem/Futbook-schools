@@ -29,8 +29,8 @@ class _MyAppState extends State<MyApp> {
         providers: [
           Provider<ProvidersModel>(
             create: (context) => ProvidersModel(
-              slotsOfThisReservationToConfirmArrival: [],
-              customList: [],
+              slotsToBeReserved: [],
+              somethingSelected: false
             ),
           ),
           StreamProvider<User>.value(

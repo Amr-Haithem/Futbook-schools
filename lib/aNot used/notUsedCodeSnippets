@@ -219,3 +219,47 @@ List.generate(
                             daysArray[currentDayIndex]);
                       },
                     ),*/
+
+
+
+
+//check if resrved to get check box function
+                    Widget checkIfReservedToGetCheckBox() {
+      if (widget.Arrived) {
+        return Checkbox(value: true);
+      } else if (widget.Reserved) {
+        bool starter = false;
+        if (context
+            .read<ProvidersModel>()
+            .slotsOfThisReservationToConfirmArrival
+            .contains(widget.slots)) {
+          starter = true;
+          return Checkbox(
+              value: starter,
+              onChanged: (bool value) {
+                setState(() {
+                  providerHolder.slotsOfThisReservationToConfirmArrival
+                      .remove(widget.slots);
+                });
+                print(context
+                    .read<ProvidersModel>()
+                    .slotsOfThisReservationToConfirmArrival);
+              });
+        } else {
+          return Checkbox(
+              value: starter,
+              onChanged: (bool value) {
+                setState(() {
+                  print(widget.slots);
+                  providerHolder.slotsOfThisReservationToConfirmArrival
+                      .add(widget.slots);
+                  value = !value;
+                  print(context
+                      .read<ProvidersModel>()
+                      .slotsOfThisReservationToConfirmArrival);
+                });
+              });
+        }
+      } else
+        return Container();
+    }

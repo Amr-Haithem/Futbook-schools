@@ -24,12 +24,6 @@ class _SignInState extends State<SignIn> {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
         resizeToAvoidBottomInset: true,
-
-        /* appBar: AppBar(
-          backgroundColor: Colors.green[800],
-          elevation: 1.0,
-          title: Text('sign in please'),
-        ),*/
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(

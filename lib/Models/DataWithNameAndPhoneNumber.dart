@@ -7,10 +7,15 @@ class DataWithNameAndPhoneNumber {
   final String nameOfCustomer;
   final String PhoneNumber;
   final String Day;
+  final List slots;
+  final bool arrived;
 
   DataWithNameAndPhoneNumber(
-      {this.nameOfCustomer,
+      {this.arrived,
+      this.nameOfCustomer,
       this.PhoneNumber,
       this.indexOfThisField,
-      this.slotsMeaning,this.Day});
+      this.slotsMeaning,
+      this.slots,
+      this.Day});
 }

@@ -38,7 +38,6 @@ class Slots extends StatefulWidget {
   ];
 
   //static List;
-  static List arr = [];
 
   @override
   _SlotsState createState() => _SlotsState();
@@ -46,6 +45,7 @@ class Slots extends StatefulWidget {
 
 class _SlotsState extends State<Slots> {
   int shifterHelper;
+  bool somethingSelected = false;
 
   //the following function returns 'a' for example after a number bigger than 9
   List listProviderForNumbersBiggerThan9(int theNumber) {
@@ -137,7 +137,6 @@ class _SlotsState extends State<Slots> {
   final AuthService _auth = AuthService();
   final rt = RealTimeDBService();
   DataOfUserAndFieldIndexOnly args;
-
   @override
   void initState() {
     super.initState();
@@ -161,7 +160,7 @@ class _SlotsState extends State<Slots> {
   bool _isButton2Disabled = false;
 
   Function isBackButtonEnabled() {
-    context.read<ProvidersModel>().slotsOfThisReservationToConfirmArrival = [];
+    context.read<ProvidersModel>().slotsToBeReserved = [];
     if (_isButton1Disabled)
       return null;
     else
@@ -177,7 +176,7 @@ class _SlotsState extends State<Slots> {
   }
 
   Function isForwardButtonEnabled() {
-    context.read<ProvidersModel>().slotsOfThisReservationToConfirmArrival = [];
+    context.read<ProvidersModel>().slotsToBeReserved = [];
     if (_isButton2Disabled)
       return null;
     else
@@ -192,40 +191,44 @@ class _SlotsState extends State<Slots> {
       };
   }
 
-  Widget backToFiledsOrCancelButton() {
-    if (false) {
-      return SizedBox(
-        width: 125,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              primary: Colors.red[700],
-              textStyle: TextStyle(
-                fontSize: 35,
-              )),
-          child: Text("إلغاء"),
-          onPressed: () async {},
-        ),
-      );
-    } else {
-      return MaterialButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        color: Colors.white,
-        textColor: Colors.black,
-        child: Icon(
-          Icons.arrow_back_ios_new_sharp,
-          size: 27,
-        ),
-        padding: EdgeInsets.all(16),
-        shape: CircleBorder(),
-      );
-    }
-  }
+  static ValueNotifier<List> enteredValue = ValueNotifier([]);
 
   @override
   Widget build(BuildContext context) {
-    Slots.arr = [];
+    //context.watch<ProvidersModel>().slotsToBeReserved.toString();
+    //Provider.of<ProvidersModel>(context, listen: true).slotsToBeReserved !=[]
+    Widget backToFiledsOrCancelButton() {
+      if (context.watch<ProvidersModel>().slotsToBeReserved != []) {
+        print("hello");
+        return SizedBox(
+          width: 125,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                primary: Colors.red[700],
+                textStyle: TextStyle(
+                  fontSize: 35,
+                )),
+            child: Text("إلغاء"),
+            onPressed: () async {},
+          ),
+        );
+      } else {
+        return MaterialButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          color: Colors.white,
+          textColor: Colors.black,
+          child: Icon(
+            Icons.arrow_back_ios_new_sharp,
+            size: 27,
+          ),
+          padding: EdgeInsets.all(16),
+          shape: CircleBorder(),
+        );
+      }
+    }
+
     print("emptied slots array");
     //TODO to ensure null-safety put an ! after (context)
 
@@ -237,137 +240,140 @@ class _SlotsState extends State<Slots> {
         ),*/
         body: Container(
       color: Colors.grey[100],
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                //chose between two button
+      child: Wrap(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //chose between two button
 
-                backToFiledsOrCancelButton(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      (args.indexOfThisField + 1).toString() + ' ملعب',
-                      style: TextStyle(fontFamily: "Cairo", fontSize: 42),
-                    ),
-                    Text('data',
-                        style: TextStyle(fontFamily: "Cairo", fontSize: 30)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        //isForwardButtonEnabled()
-                        Container(
-                          width: 50,
-                          height: 30,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.grey[700]),
-                            onPressed: isBackButtonEnabled(),
-                            child: IconButton(
-                              color: Colors.grey,
-                              icon: Transform.translate(
-                                offset: Offset(-10, -4),
-                                child: Icon(
-                                  Icons.arrow_back_rounded,
-                                  color: Colors.white,
-                                ),
+              backToFiledsOrCancelButton(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    (args.indexOfThisField + 1).toString() + ' ملعب',
+                    style: TextStyle(fontFamily: "Cairo", fontSize: 42),
+                  ),
+                  Text('data',
+                      style: TextStyle(fontFamily: "Cairo", fontSize: 30)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      //isForwardButtonEnabled()
+                      Container(
+                        width: 50,
+                        height: 30,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.grey[700]),
+                          onPressed: isBackButtonEnabled(),
+                          child: IconButton(
+                            color: Colors.grey,
+                            icon: Transform.translate(
+                              offset: Offset(-10, -4),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(width: 15),
-                        Text(
-                          daysArray[currentDayIndex],
-                          style: TextStyle(fontFamily: 'Cairo', fontSize: 30),
-                        ),
-                        SizedBox(width: 15),
-                        Container(
-                          width: 50,
-                          height: 30,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.grey[700]),
-                            onPressed: isForwardButtonEnabled(),
-                            child: IconButton(
-                              color: Colors.grey[800],
-                              icon: Transform.translate(
-                                offset: Offset(-10, -4),
-                                child: Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                ),
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        daysArray[currentDayIndex],
+                        style: TextStyle(fontFamily: 'Cairo', fontSize: 30),
+                      ),
+                      SizedBox(width: 15),
+                      Container(
+                        width: 50,
+                        height: 30,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.grey[700]),
+                          onPressed: isForwardButtonEnabled(),
+                          child: IconButton(
+                            color: Colors.grey[800],
+                            icon: Transform.translate(
+                              offset: Offset(-10, -4),
+                              child: Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                Column(children: [
-                  //choose between two buttons
-                  ReserveButton(
-                      rt: rt,
-                      args: args,
-                      daysArray: daysArray,
-                      currentDayIndex: currentDayIndex)
-                ])
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Column(children: [
+                //choose between two buttons
+                ReserveButton(
+                    rt: rt,
+                    args: args,
+                    daysArray: daysArray,
+                    currentDayIndex: currentDayIndex)
+              ])
+            ],
+          ),
+        ),
 
-            /*SizedBox(
+        /*SizedBox(
               height: 50,
             ),*/
-            StreamBuilder(
-              initialData: null,
-              stream: _firestoreService.listenToDataFromSchoolList('schoolId'),
-              builder: (context, snapshot1) {
-                return StreamBuilder(
-                    //here we can use provider along with sliderOfDays class to update the state
-                    stream: RealTimeDBService().streamValueOfUserData(
-                        args.indexOfThisField, daysArray[currentDayIndex]),
-                    builder: (context, snapshot) {
-                      List listOfAllData;
-                      if (snapshot.hasData) {
-                        print('Stream changed');
-                        Map allData = snapshot.data.snapshot.value;
+        StreamBuilder(
+          initialData: null,
+          stream: _firestoreService.listenToDataFromSchoolList('schoolId'),
+          builder: (context, snapshot1) {
+            return StreamBuilder(
+                //here we can use provider along with sliderOfDays class to update the state
+                stream: RealTimeDBService().streamValueOfUserData(
+                    args.indexOfThisField, daysArray[currentDayIndex]),
+                builder: (context, snapshot) {
+                  List listOfAllData;
+                  if (snapshot.hasData) {
+                    print('Stream changed');
+                    Map allData = snapshot.data.snapshot.value;
 
-                        if (allData != null) {
-                          listOfAllData = allData.values.toList();
-                          print(listOfAllData);
-                        }
-                      }
-                      return Container(
-                          //color: Colors.blueGrey,
-                          height: 500,
-                          width: 1000,
-                          child: FutureBuilder(
-                            future: ListOfBlocksBuilder(listOfAllData),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return Wrap(
-                                  spacing: 10.0,
-                                  runSpacing: 10.0,
-                                  direction: Axis.vertical,
-                                  children: snapshot.data,
-                                );
-                              } else {
-                                return Container(
-                                    child: CircularProgressIndicator());
-                              }
-                            },
-                          ));
-                    });
-              },
-            )
-          ]),
+                    if (allData != null) {
+                      listOfAllData = allData.values.toList();
+                      print(listOfAllData);
+                    }
+                  }
+                  return Container(
+                      //color: Colors.blueGrey,
+                      height: 500,
+                      width: 1000,
+                      child: FutureBuilder(
+                        future: ListOfBlocksBuilder(listOfAllData),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Wrap(
+                                spacing: 10.0,
+                                runSpacing: 10.0,
+                                direction: Axis.vertical,
+                                children: snapshot.data,
+                              ),
+                            );
+                          } else {
+                            return Container(
+                                child: CircularProgressIndicator());
+                          }
+                        },
+                      ));
+                });
+          },
+        )
+      ]),
     ));
   }
 }
@@ -398,13 +404,18 @@ class ReserveButton extends StatelessWidget {
             )),
         child: Text("احجز"),
         onPressed: () async {
-          if (await rt.updateReservationData(args.user, args.indexOfThisField,
-              Slots.arr, daysArray[currentDayIndex])) {
+          if (await rt.updateReservationData(
+                  args.user,
+                  args.indexOfThisField,
+                  context.read<ProvidersModel>().slotsToBeReserved,
+                  daysArray[currentDayIndex]) &&
+              context.read<ProvidersModel>().slotsToBeReserved.isNotEmpty) {
             Navigator.pushNamed(context, '/CustomerInfo',
                 arguments: DataWithoutNameAndPhoneNumber(
                     user: args.user,
                     indexOfThisField: args.indexOfThisField,
-                    slotsReserved: Slots.arr,
+                    slotsReserved:
+                        context.read<ProvidersModel>().slotsToBeReserved,
                     dayIndex: daysArray[currentDayIndex]));
           } else {
             print("didn't register : a message from slots page");
