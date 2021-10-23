@@ -4,10 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:futbook_school/Models/RerservationHolder.dart';
-import 'package:futbook_school/Pages/Screens/Slots/Slots.dart';
-import 'package:provider/provider.dart';
 
 class RealTimeDBService {
   String listProviderForNumbersBiggerThan9(int theNumber) {
@@ -26,14 +22,16 @@ class RealTimeDBService {
       int requestedFieldIndex,
       List requestedSlotsIndices,
       String dayIndex) async {
+    print('sorry daawg');
+    print(dayIndex);
     bool availability = true;
     for (int i = 0; i < requestedSlotsIndices.length; i++) {
       await databaseReference
           .child("Reservation_Data")
           //will be replaced by user from email
           .child("UndefinedSchool")
-          .child(requestedFieldIndex.toString())
           .child(dayIndex)
+          .child(requestedFieldIndex.toString())
           .child(requestedSlotsIndices[i][0].toString())
           .once()
           .then((DataSnapshot dss) {
@@ -69,16 +67,21 @@ class RealTimeDBService {
 
     if (await checkInstantlyIfReserved(getUserNameFromEmailAddress(user.email),
         fieldIndex, slotIndices, dayIndex)) {
+      Map<String, bool> slotsToBeReserved = {};
       for (int i = 0; i < slotIndices.length; i++) {
-        await databaseReference
-            .child("Reservation_Data")
-            //will be replaced by user from email
-            .child("UndefinedSchool")
-            .child(fieldIndex.toString())
-            .child(dayIndex)
-            .update(
-                {returningTheActualSlots(slotIndices[i][0].toString()): true});
+        {
+          slotsToBeReserved.putIfAbsent(
+              returningTheActualSlots(slotIndices[i][0].toString()),
+              () => true);
+        }
       }
+      await databaseReference
+          .child("Reservation_Data")
+          .child("UndefinedSchool")
+          .child(dayIndex)
+          .child(fieldIndex.toString())
+          .update(slotsToBeReserved);
+
       print("slots reserved");
       return true;
     } else {
@@ -99,23 +102,21 @@ class RealTimeDBService {
 
   Future<bool> UpdateUserData(User user, int fieldIndex, List slotIndices,
       String nameOfClient, String phoneNumber, String dayIndex) async {
-    for (int i = 0; i < slotIndices.length; i++) {
-      //updating User data "the data of reservation"
-      await databaseReference
-          .child("User data")
-          //will be replaced by user from email
-          .child("UndefinedSchool")
-          .child(fieldIndex.toString())
-          .child(dayIndex)
-          .child(slotIndices[0][0].toString() +
-              '-' +
-              slotIndices[slotIndices.length - 1][0].toString())
-          .set({
-        "phoneNumberOfCustomer": phoneNumber,
-        "nameOfCustomer": nameOfClient,
-        "slots": getSlotsFromEmbeddedArray(slotIndices)
-      });
-    }
+    //updating User data "the data of reservation"
+    await databaseReference
+        .child("User data")
+        //will be replaced by user from email
+        .child("UndefinedSchool")
+        .child(dayIndex)
+        .child(fieldIndex.toString())
+        .child(slotIndices[0][0].toString() +
+            '-' +
+            slotIndices[slotIndices.length - 1][0].toString())
+        .set({
+      "phoneNumberOfCustomer": phoneNumber,
+      "nameOfCustomer": nameOfClient,
+      "slots": getSlotsFromEmbeddedArray(slotIndices)
+    });
   }
 
   Future<Map> unReserveSlots(
@@ -151,8 +152,8 @@ class RealTimeDBService {
         .reference()
         .child("User data")
         .child("UndefinedSchool")
-        .child(fieldIndex.toString())
         .child(dayIndex)
+        .child(fieldIndex.toString())
         //todo take a look if to change on vlaue
         .onValue;
   }
@@ -163,8 +164,8 @@ class RealTimeDBService {
         .child("User data")
         //will be replaced by user from email
         .child("UndefinedSchool")
-        .child(requestedFieldIndex.toString())
         .child(dayIndex)
+        .child(requestedFieldIndex.toString())
         .child(reservationKey)
         .update({'arrived': true});
   }

@@ -28,10 +28,8 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
         providers: [
           Provider<ProvidersModel>(
-            create: (context) => ProvidersModel(
-              slotsToBeReserved: [],
-              somethingSelected: false
-            ),
+            create: (context) =>
+                ProvidersModel(slotsToBeReserved: [], somethingSelected: false),
           ),
           StreamProvider<User>.value(
             initialData: null,

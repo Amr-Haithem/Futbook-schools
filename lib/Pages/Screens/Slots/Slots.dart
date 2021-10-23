@@ -7,6 +7,7 @@ import 'package:futbook_school/Pages/Screens/Slots/singleButtonBlock.dart';
 import 'package:futbook_school/Services/FirestoreService.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
 import 'package:futbook_school/Services/auth.dart';
+import 'package:futbook_school/Services/date.dart';
 import 'package:provider/provider.dart';
 
 class Slots extends StatefulWidget {
@@ -36,6 +37,15 @@ class Slots extends StatefulWidget {
     '6 AM - 7 AM',
     '7 AM - 8 AM',
   ];
+  Map<String, String> weekdaysInArabic = {
+    "1": "الإثنين",
+    "2": "الثلاثاء",
+    "3": "الأربعاء",
+    "4": "الخميس",
+    "5": "الجمعة",
+    "6": "السبت",
+    "7": "الأحد",
+  };
 
   //static List;
 
@@ -46,6 +56,12 @@ class Slots extends StatefulWidget {
 class _SlotsState extends State<Slots> {
   int shifterHelper;
   bool somethingSelected = false;
+  DateTime date;
+
+  final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _auth = AuthService();
+  final rt = RealTimeDBService();
+  DataOfUserAndFieldIndexOnly args;
 
   //the following function returns 'a' for example after a number bigger than 9
   List listProviderForNumbersBiggerThan9(int theNumber) {
@@ -114,7 +130,11 @@ class _SlotsState extends State<Slots> {
                   listOfAllData[counter]['arrived'] == false
               ? false
               : true,
-          Day: daysArray[currentDayIndex],
+          Day: daysArray[currentDayIndex].day.toString() +
+              '-' +
+              daysArray[currentDayIndex].month.toString() +
+              '-' +
+              daysArray[currentDayIndex].year.toString(),
           Field: args.indexOfThisField,
         ));
         counter++;
@@ -133,15 +153,10 @@ class _SlotsState extends State<Slots> {
     return listOfBlocks;
   }
 
-  final FirestoreService _firestoreService = FirestoreService();
-  final AuthService _auth = AuthService();
-  final rt = RealTimeDBService();
-  DataOfUserAndFieldIndexOnly args;
   @override
-  void initState() {
+  Future<void> initState() {
     super.initState();
     //ahmed sameh (is it a good practice?)
-
     Future.delayed(Duration.zero, () {
       setState(() {
         args = ModalRoute.of(context).settings.arguments;
@@ -150,10 +165,12 @@ class _SlotsState extends State<Slots> {
   }
 
   //code of the slider
-  List daysArray = ["day0", "day1", "day2", "day3", "day4", "day5", "day6"];
+  List daysArray = [];
   /*
   http resopncse gdedddn
   */
+
+  //functionalities of the arrows
   int currentDayIndex = 0;
   int numberOfFields = 7;
   bool _isButton1Disabled = true;
@@ -191,14 +208,10 @@ class _SlotsState extends State<Slots> {
       };
   }
 
-  static ValueNotifier<List> enteredValue = ValueNotifier([]);
-
   @override
   Widget build(BuildContext context) {
-    //context.watch<ProvidersModel>().slotsToBeReserved.toString();
-    //Provider.of<ProvidersModel>(context, listen: true).slotsToBeReserved !=[]
     Widget backToFiledsOrCancelButton() {
-      if (context.watch<ProvidersModel>().slotsToBeReserved != []) {
+      if (context.read<ProvidersModel>().somethingSelected) {
         print("hello");
         return SizedBox(
           width: 125,
@@ -233,147 +246,163 @@ class _SlotsState extends State<Slots> {
     //TODO to ensure null-safety put an ! after (context)
 
     return Scaffold(
-        /*
-        appBar: AppBar(
-          backgroundColor: Colors.blue,
-          title: Text('Slots page'),
-        ),*/
-        body: Container(
-      color: Colors.grey[100],
-      child: Wrap(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              //chose between two button
+        body: FutureBuilder(
+      future: Date().fetchDate(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          date = snapshot.data;
+          daysArray = [];
 
-              backToFiledsOrCancelButton(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    (args.indexOfThisField + 1).toString() + ' ملعب',
-                    style: TextStyle(fontFamily: "Cairo", fontSize: 42),
-                  ),
-                  Text('data',
-                      style: TextStyle(fontFamily: "Cairo", fontSize: 30)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      //isForwardButtonEnabled()
-                      Container(
-                        width: 50,
-                        height: 30,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.grey[700]),
-                          onPressed: isBackButtonEnabled(),
-                          child: IconButton(
-                            color: Colors.grey,
-                            icon: Transform.translate(
-                              offset: Offset(-10, -4),
-                              child: Icon(
-                                Icons.arrow_back_rounded,
-                                color: Colors.white,
+          for (int i = 0; i < 7; i++) {
+            daysArray.add(date.add(Duration(days: i)));
+          }
+          return Container(
+            color: Colors.grey[100],
+            child: Wrap(children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    backToFiledsOrCancelButton(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          (args.indexOfThisField + 1).toString() + ' ملعب',
+                          style: TextStyle(fontFamily: "Cairo", fontSize: 42),
+                        ),
+                        Text(
+                            daysArray[currentDayIndex].day.toString() +
+                                '-' +
+                                daysArray[currentDayIndex].month.toString(),
+                            style:
+                                TextStyle(fontFamily: "Cairo", fontSize: 30)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 50,
+                              height: 30,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Colors.grey[700]),
+                                onPressed: isBackButtonEnabled(),
+                                child: IconButton(
+                                  color: Colors.grey,
+                                  icon: Transform.translate(
+                                    offset: Offset(-10, -4),
+                                    child: Icon(
+                                      Icons.arrow_back_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        daysArray[currentDayIndex],
-                        style: TextStyle(fontFamily: 'Cairo', fontSize: 30),
-                      ),
-                      SizedBox(width: 15),
-                      Container(
-                        width: 50,
-                        height: 30,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.grey[700]),
-                          onPressed: isForwardButtonEnabled(),
-                          child: IconButton(
-                            color: Colors.grey[800],
-                            icon: Transform.translate(
-                              offset: Offset(-10, -4),
-                              child: Icon(
-                                Icons.arrow_forward_rounded,
-                                color: Colors.white,
+                            SizedBox(width: 15),
+                            Text(
+                              widget.weekdaysInArabic[daysArray[currentDayIndex]
+                                  .weekday
+                                  .toString()],
+                              style:
+                                  TextStyle(fontFamily: 'Cairo', fontSize: 30),
+                            ),
+                            SizedBox(width: 15),
+                            Container(
+                              width: 50,
+                              height: 30,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Colors.grey[700]),
+                                onPressed: isForwardButtonEnabled(),
+                                child: IconButton(
+                                  color: Colors.grey[800],
+                                  icon: Transform.translate(
+                                    offset: Offset(-10, -4),
+                                    child: Icon(
+                                      Icons.arrow_forward_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                    Column(children: [
+                      //choose between two buttons
+                      ReserveButton(
+                          rt: rt,
+                          args: args,
+                          daysArray: daysArray,
+                          currentDayIndex: currentDayIndex)
+                    ])
+                  ],
+                ),
               ),
-              Column(children: [
-                //choose between two buttons
-                ReserveButton(
-                    rt: rt,
-                    args: args,
-                    daysArray: daysArray,
-                    currentDayIndex: currentDayIndex)
-              ])
-            ],
-          ),
-        ),
+              StreamBuilder(
+                initialData: null,
+                stream:
+                    _firestoreService.listenToDataFromSchoolList('schoolId'),
+                builder: (context, snapshot1) {
+                  return StreamBuilder(
+                      //here we can use provider along with sliderOfDays class to update the state
+                      stream: RealTimeDBService().streamValueOfUserData(
+                          args.indexOfThisField,
+                          daysArray[currentDayIndex].day.toString() +
+                              '-' +
+                              daysArray[currentDayIndex].month.toString() +
+                              '-' +
+                              daysArray[currentDayIndex].year.toString()),
+                      builder: (context, snapshot) {
+                        List listOfAllData;
+                        if (snapshot.hasData) {
+                          print('Stream changed');
+                          Map allData = snapshot.data.snapshot.value;
 
-        /*SizedBox(
-              height: 50,
-            ),*/
-        StreamBuilder(
-          initialData: null,
-          stream: _firestoreService.listenToDataFromSchoolList('schoolId'),
-          builder: (context, snapshot1) {
-            return StreamBuilder(
-                //here we can use provider along with sliderOfDays class to update the state
-                stream: RealTimeDBService().streamValueOfUserData(
-                    args.indexOfThisField, daysArray[currentDayIndex]),
-                builder: (context, snapshot) {
-                  List listOfAllData;
-                  if (snapshot.hasData) {
-                    print('Stream changed');
-                    Map allData = snapshot.data.snapshot.value;
-
-                    if (allData != null) {
-                      listOfAllData = allData.values.toList();
-                      print(listOfAllData);
-                    }
-                  }
-                  return Container(
-                      //color: Colors.blueGrey,
-                      height: 500,
-                      width: 1000,
-                      child: FutureBuilder(
-                        future: ListOfBlocksBuilder(listOfAllData),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Wrap(
-                                spacing: 10.0,
-                                runSpacing: 10.0,
-                                direction: Axis.vertical,
-                                children: snapshot.data,
-                              ),
-                            );
-                          } else {
-                            return Container(
-                                child: CircularProgressIndicator());
+                          if (allData != null) {
+                            listOfAllData = allData.values.toList();
+                            print(listOfAllData);
                           }
-                        },
-                      ));
-                });
-          },
-        )
-      ]),
+                        }
+                        return Container(
+                            //color: Colors.blueGrey,
+                            height: 500,
+                            width: 1000,
+                            child: FutureBuilder(
+                              future: ListOfBlocksBuilder(listOfAllData),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Wrap(
+                                      spacing: 10.0,
+                                      runSpacing: 10.0,
+                                      direction: Axis.vertical,
+                                      children: snapshot.data,
+                                    ),
+                                  );
+                                } else {
+                                  return Container(
+                                      child: CircularProgressIndicator());
+                                }
+                              },
+                            ));
+                      });
+                },
+              )
+            ]),
+          );
+        } else {
+          return Container(child: CircularProgressIndicator());
+        }
+      },
     ));
   }
 }
@@ -408,7 +437,12 @@ class ReserveButton extends StatelessWidget {
                   args.user,
                   args.indexOfThisField,
                   context.read<ProvidersModel>().slotsToBeReserved,
-                  daysArray[currentDayIndex]) &&
+                  (daysArray[currentDayIndex].day.toString() +
+                          "-" +
+                          daysArray[currentDayIndex].month.toString() +
+                          "-" +
+                          daysArray[currentDayIndex].year.toString())
+                      .toString()) &&
               context.read<ProvidersModel>().slotsToBeReserved.isNotEmpty) {
             Navigator.pushNamed(context, '/CustomerInfo',
                 arguments: DataWithoutNameAndPhoneNumber(
@@ -416,7 +450,11 @@ class ReserveButton extends StatelessWidget {
                     indexOfThisField: args.indexOfThisField,
                     slotsReserved:
                         context.read<ProvidersModel>().slotsToBeReserved,
-                    dayIndex: daysArray[currentDayIndex]));
+                    dayIndex: daysArray[currentDayIndex].day.toString() +
+                        '/' +
+                        daysArray[currentDayIndex].month.toString(),
+                    dayWeekdayArabic: Slots().weekdaysInArabic[
+                        daysArray[currentDayIndex].weekday.toString()]));
           } else {
             print("didn't register : a message from slots page");
           }

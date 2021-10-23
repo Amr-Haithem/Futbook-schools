@@ -1,12 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:futbook_school/Models/DataWithNameAndPhoneNumber.dart';
 import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
 import 'package:provider/provider.dart';
-import 'Slots.dart';
 
 class SingleButtonBlock extends StatefulWidget {
   final sequentialIndex;
@@ -59,15 +56,9 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     }
     for (int i = 0; i < newVal.length; i++) {
       if (widget.sequentialIndex == newVal[i]) {
-        //here i start
-
-        //context.watch<ProvidersModel>().somethingSelected = true;
-        //print(context.read<ProvidersModel>().somethingSelected);
         return Colors.yellowAccent;
       }
     }
-
-    //context.watch<ProvidersModel>().somethingSelected = false;
 
     return Colors.lightGreenAccent[400];
   }
@@ -108,7 +99,9 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   Widget checkboxIfSelected(newVal) {
     for (int i = 0; i < newVal.length; i++) {
       if (widget.sequentialIndex == newVal[i]) {
-        return Checkbox(value: true);
+        return Checkbox(
+          value: true,
+        );
       }
     }
 
@@ -117,14 +110,21 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
 
   @override
   Widget build(BuildContext context) {
-    context.read<ProvidersModel>().slotsToBeReserved = [];
+    context.watch<ProvidersModel>().slotsToBeReserved = [];
 
     return Container(
       child: ValueListenableBuilder(
         valueListenable: enteredValue,
         builder: (context, newVal, child) {
           for (int i = 0; i < newVal.length; i++) {
+            if (widget.sequentialIndex == newVal[i] && widget.Reserved) {
+              //here i used this to trim if there's a reserved slot in the way
+              newVal.removeRange(widget.sequentialIndex, newVal.length);
+            }
+          }
+          for (int i = 0; i < newVal.length; i++) {
             if (widget.sequentialIndex == newVal[i]) {
+              print(widget.Reserved);
               context
                   .read<ProvidersModel>()
                   .slotsToBeReserved
@@ -184,7 +184,6 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
                     }
                   }
                 }
-                print(enteredValue.value);
               }
             },
             style: ElevatedButton.styleFrom(

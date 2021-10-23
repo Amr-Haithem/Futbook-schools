@@ -263,3 +263,36 @@ List.generate(
       } else
         return Container();
     }
+
+
+    FutureBuilder(
+                        future: Future.wait([
+                          ListOfBlocksBuilder(listOfAllData),
+                          Date().fetchDate()
+                        ]),
+                        builder:
+                            (context, AsyncSnapshot<List<dynamic>> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            date = snapshot.data[1];
+                            daysArray = [];
+                            for (int i = 0; i < 7; i++) {
+                              daysArray
+                                  .add(date.add(Duration(days: i)).toString());
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Wrap(
+                                spacing: 10.0,
+                                runSpacing: 10.0,
+                                direction: Axis.vertical,
+                                children: snapshot.data[0],
+                              ),
+                            );
+                          } else {
+                            return Container(
+                                child: CircularProgressIndicator());
+                          }
+                        },
+                      )

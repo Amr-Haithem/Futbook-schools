@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
+
 class ProvidersModel {
   List slotsToBeReserved = [];
-  bool somethingSelected;
+  bool somethingSelected = false;
 
   ProvidersModel({this.slotsToBeReserved, this.somethingSelected});
+
 }

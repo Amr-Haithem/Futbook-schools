@@ -57,29 +57,51 @@ class _CustomerInfoState extends State<CustomerInfo> {
                   alignment: WrapAlignment.center,
                   children: [
                     Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(50),
-                              bottomRight: Radius.circular(50)),
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        height: height * .2,
-                        width: width * .4,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Futbook",
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(50),
+                            bottomRight: Radius.circular(50)),
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      width: width * .4,
+                      child: Column(
+                        children: [
+                          Text(
+                            "ملعب" + (args.indexOfThisField + 1).toString(),
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: "Cairo",
-                                fontSize: 45),
+                                fontSize: 33),
                           ),
-                        )),
+                          Text(
+                            args.dayIndex,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: "Cairo",
+                                fontSize: 30),
+                          ),
+                          Text(
+                            args.dayWeekdayArabic,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: "Cairo",
+                                fontSize: 40),
+                          ),
+                          Text(
+                            "time in arabic",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: "Cairo",
+                                fontSize: 30),
+                          ),
+                        ],
+                      ),
+                    ),
                     Form(
                       key: _formKey,
                       child: Container(
                           padding: EdgeInsets.symmetric(
-                              vertical: 80.0, horizontal: 200.0),
+                              vertical: 30.0, horizontal: 200.0),
                           child: Column(
                             children: <Widget>[
                               Container(
