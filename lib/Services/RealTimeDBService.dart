@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
+import 'package:http/http.dart';
 
 class RealTimeDBService {
   String listProviderForNumbersBiggerThan9(int theNumber) {
@@ -18,7 +19,7 @@ class RealTimeDBService {
   final databaseReference = FirebaseDatabase.instance.reference();
 
   Future<bool> checkInstantlyIfReserved(
-      String schoolUser,
+      String userEmail,
       int requestedFieldIndex,
       List requestedSlotsIndices,
       String dayIndex) async {
@@ -29,7 +30,7 @@ class RealTimeDBService {
       await databaseReference
           .child("Reservation_Data")
           //will be replaced by user from email
-          .child("UndefinedSchool")
+          .child(getUserNameFromEmailAddress(userEmail))
           .child(dayIndex)
           .child(requestedFieldIndex.toString())
           .child(requestedSlotsIndices[i][0].toString())
@@ -77,7 +78,7 @@ class RealTimeDBService {
       }
       await databaseReference
           .child("Reservation_Data")
-          .child("UndefinedSchool")
+          .child(getUserNameFromEmailAddress(user.email))
           .child(dayIndex)
           .child(fieldIndex.toString())
           .update(slotsToBeReserved);
@@ -106,7 +107,7 @@ class RealTimeDBService {
     await databaseReference
         .child("User data")
         //will be replaced by user from email
-        .child("UndefinedSchool")
+        .child(getUserNameFromEmailAddress(user.email))
         .child(dayIndex)
         .child(fieldIndex.toString())
         .child(slotIndices[0][0].toString() +
@@ -119,51 +120,42 @@ class RealTimeDBService {
     });
   }
 
-  Future<Map> unReserveSlots(
-      User user, int fieldIndex, List slotIndices) async {
-    await databaseReference
-        .child("User data")
-        //will be replaced by user from email
-        .child("UndefinedSchool")
-        .child(fieldIndex.toString())
-        .child("day0")
-        .child(slotIndices[0].toString() +
-            '-' +
-            slotIndices[slotIndices.length - 1].toString())
-        .remove();
+  Future<Map> unReserveReservationDataSlots(
+      User user, int fieldIndex, List slotIndices, String dayIndex) async {
+    Map<String, dynamic> x = {};
     for (int i = 0; i < slotIndices.length; i++) {
-      await databaseReference
-          .child("Reservation_Data")
-          //will be replaced by user from email
-          .child("UndefinedSchool")
-          .child(fieldIndex.toString())
-          .child("day0")
-          .update({slotIndices[i].toString(): false});
+      x.putIfAbsent(slotIndices[i][0].toString(), () => null);
     }
-    print("unreserved slot " +
-        slotIndices.toString() +
-        "and removed it from User data");
+    print(x);
+    await databaseReference
+        .child("Reservation_Data")
+        //will be replaced by user from email
+        .child(getUserNameFromEmailAddress(user.email))
+        .child(dayIndex)
+        .child(fieldIndex.toString())
+        .update(x);
+    print("unreserved slots in due to incomplete reservation process");
   }
 
 //listener function to listen to slots changed in a particular day in a particular field
 //this listener downloads one kilo bytes each time it downloads data
-  Stream streamValueOfUserData(int fieldIndex, String dayIndex) {
+  Stream streamValueOfUserData(User user, int fieldIndex, String dayIndex) {
     return FirebaseDatabase.instance
         .reference()
         .child("User data")
-        .child("UndefinedSchool")
+        .child(getUserNameFromEmailAddress(user.email))
         .child(dayIndex)
         .child(fieldIndex.toString())
         //todo take a look if to change on vlaue
         .onValue;
   }
 
-  Future<void> updatingArrivedReservations(String schoolUser,
+  Future<void> updatingArrivedReservations(User schoolUser,
       int requestedFieldIndex, String reservationKey, String dayIndex) async {
     await databaseReference
         .child("User data")
         //will be replaced by user from email
-        .child("UndefinedSchool")
+        .child(getUserNameFromEmailAddress(schoolUser.email))
         .child(dayIndex)
         .child(requestedFieldIndex.toString())
         .child(reservationKey)

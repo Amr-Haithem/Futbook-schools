@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithNameAndPhoneNumber.dart';
@@ -16,6 +17,7 @@ class SingleButtonBlock extends StatefulWidget {
   final bool Arrived;
   final String Day;
   final int Field;
+  final User user;
 
   const SingleButtonBlock(
       {this.sequentialIndex,
@@ -27,7 +29,7 @@ class SingleButtonBlock extends StatefulWidget {
       this.Reserved,
       this.Arrived,
       this.Day,
-      this.Field});
+      this.Field,this.user});
 
   @override
   _SingleButtonBlockState createState() => _SingleButtonBlockState();
@@ -156,7 +158,8 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
                         indexOfThisField: widget.Field,
                         slotsMeaning: widget.slotMeaning,
                         slots: widget.slots,
-                        Day: widget.Day));
+                        Day: widget.Day,
+                        user: widget.user));
               } else {
                 context.read<ProvidersModel>().slotsToBeReserved = [];
                 if (enteredValue.value.isEmpty) {

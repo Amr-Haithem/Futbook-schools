@@ -75,7 +75,7 @@ class _InvoiceState extends State<Invoice> {
                     });
                     print(getChildOfDayFromSlots(args.slots));
                     rt.updatingArrivedReservations(
-                        'schoolUser',
+                        args.user,
                         args.indexOfThisField,
                         getChildOfDayFromSlots(args.slots),
                         args.Day);

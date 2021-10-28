@@ -7,6 +7,9 @@ class FirestoreService {
   CollectionReference schoolsList =
       FirebaseFirestore.instance.collection('Schools_List');
 
+  CollectionReference general_Flags =
+      FirebaseFirestore.instance.collection('General_Flags');
+
   Future<void> getSchoolData(String schoolDocName) async {
     try {
       await schoolsList.get().then((value) {
@@ -19,10 +22,10 @@ class FirestoreService {
     }
   }
 
-  Future<int> getThisSchoolDataStartTime(String schoolDocName) async {
+  Future<int> getThisSchoolDataStartTime(String schoolEmail) async {
     try {
       Map x = {};
-      await schoolsList.doc('School_4').get().then((value) {
+      await schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).get().then((value) {
         x = value.data();
       });
       return x['startTime'];
@@ -32,10 +35,10 @@ class FirestoreService {
     }
   }
 
-  Future<int> getThisSchoolDataEndTime(String schoolDocName) async {
+  Future<int> getThisSchoolDataEndTime(String schoolEmail) async {
     try {
       Map x = {};
-      await schoolsList.doc('School_4').get().then((value) {
+      await schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).get().then((value) {
         x = value.data();
       });
       return x['endTime'];
@@ -44,10 +47,11 @@ class FirestoreService {
       return null;
     }
   }
-  Future<int> getNumberOfFieldsFunc(String schoolDocName) async {
+
+  Future<int> getNumberOfFieldsFunc(String schoolEmail) async {
     try {
       Map x = {};
-      await schoolsList.doc('School_4').get().then((value) {
+      await schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).get().then((value) {
         x = value.data();
       });
       return x['numberOfFields'];
@@ -57,9 +61,33 @@ class FirestoreService {
     }
   }
 
+  Future<String> getSchoolRealName(String schoolEmail) async {
+    try {
+      Map x = {};
+      await general_Flags.doc('schoolNames').get().then((value) {
+        x = value.data();
+      });
+      return x[schoolEmail];
+    } catch (e) {
+      print('error in getting school start time data');
+      return null;
+    }
+  }
+
   //getting stream from schools list data firestore
-  Stream listenToDataFromSchoolList(String schoolId) {
-    return schoolsList.doc('School_4').snapshots();
+  Stream listenToDataFromSchoolList(String schoolEmail) {
+    return schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).snapshots();
+  }
+  
+
+  String getUserNameFromEmailAddress(String s) {
+    String newS = "";
+    for (int i = 0; i < s.length; i++) {
+      if (s[i] == '@') {
+        break;
+      }
+      newS += s[i];
+    }
+    return newS;
   }
 }
-

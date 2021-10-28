@@ -23,7 +23,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
     final DataWithoutNameAndPhoneNumber args =
         ModalRoute.of(context).settings.arguments;
     return Scaffold(
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: true, //use this
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
@@ -31,199 +31,220 @@ class _CustomerInfoState extends State<CustomerInfo> {
               fit: BoxFit.cover,
             ),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 40,
-                left: 40,
-                child: MaterialButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  color: Colors.white,
-                  textColor: Colors.black,
-                  child: Icon(
-                    Icons.arrow_back_ios_new_sharp,
-                    size: 27,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (overScroll) {
+              overScroll.disallowIndicator();
+              return;
+            },
+            child: SingleChildScrollView(
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 40,
+                    left: 40,
+                    child: MaterialButton(
+                      onPressed: () async {
+                        //here's the code
+                        await rt.unReserveReservationDataSlots(
+                            args.user,
+                            args.indexOfThisField,
+                            args.slotsReserved,
+                            args.dayIndex);
+                        Navigator.of(context).pop();
+                      },
+                      color: Colors.white,
+                      textColor: Colors.black,
+                      child: Icon(
+                        Icons.arrow_back_ios_new_sharp,
+                        size: 27,
+                      ),
+                      padding: EdgeInsets.all(16),
+                      shape: CircleBorder(),
+                    ),
                   ),
-                  padding: EdgeInsets.all(16),
-                  shape: CircleBorder(),
-                ),
-              ),
-              Container(
-                height: height,
-                child: Wrap(
-                  //mainAxisAlignment: MainAxisAlignment.start,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(50),
-                            bottomRight: Radius.circular(50)),
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                      width: width * .4,
-                      child: Column(
-                        children: [
-                          Text(
-                            "ملعب" + (args.indexOfThisField + 1).toString(),
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Cairo",
-                                fontSize: 33),
+                  Container(
+                    height: height,
+                    child: Wrap(
+                      //mainAxisAlignment: MainAxisAlignment.start,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(50),
+                                bottomRight: Radius.circular(50)),
+                            color: Colors.white.withOpacity(0.9),
                           ),
-                          Text(
-                            args.dayIndex,
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Cairo",
-                                fontSize: 30),
-                          ),
-                          Text(
-                            args.dayWeekdayArabic,
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Cairo",
-                                fontSize: 40),
-                          ),
-                          Text(
-                            "time in arabic",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Cairo",
-                                fontSize: 30),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Form(
-                      key: _formKey,
-                      child: Container(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 30.0, horizontal: 200.0),
+                          width: width * .4,
                           child: Column(
-                            children: <Widget>[
-                              Container(
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    ':اسم العميل',
-                                    style: TextStyle(
-                                        fontFamily: "Cairo",
-                                        fontSize: 28,
-                                        color: Colors.white),
-                                  ),
-                                ),
+                            children: [
+                              Text(
+                                "ملعب" + (args.indexOfThisField + 1).toString(),
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Cairo",
+                                    fontSize: 33),
                               ),
-                              SizedBox(height: 1.0),
-                              Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: TextFormField(
-                                    style: TextStyle(
-                                        fontFamily: "Cairo",
-                                        fontSize: 20,
-                                        color: Colors.black),
-                                    decoration: const InputDecoration(
-                                        errorStyle: TextStyle(
-                                          fontSize: 16.0,
-                                          color: Colors.yellowAccent,
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                        border: OutlineInputBorder(),
-                                        hintStyle: TextStyle(
-                                            fontFamily: "Cairo", fontSize: 20),
-                                        hintTextDirection: TextDirection.rtl,
-                                        hintText: "ادخل اسم العميل"),
-                                    validator: (value) {
-                                      if (value == '') {
-                                        return "ادخل اسم العميل بشكل صحيح";
-                                      } else
-                                        return null;
-                                    },
-                                    onChanged: (val) {
-                                      setState(() => NameOfCustomer = val);
-                                    }),
+                              Text(
+                                args.dayIndex,
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Cairo",
+                                    fontSize: 30),
                               ),
-                              SizedBox(height: 20.0),
-                              Container(
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    ':رقم تليفون العميل',
-                                    style: TextStyle(
-                                        fontFamily: "Cairo",
-                                        fontSize: 28,
-                                        color: Colors.white),
-                                  ),
-                                ),
+                              Text(
+                                args.dayWeekdayArabic,
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Cairo",
+                                    fontSize: 40),
                               ),
-                              Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: TextFormField(
-                                    autofocus: true,
-                                    style: TextStyle(
-                                        fontFamily: "Cairo",
-                                        fontSize: 18,
-                                        color: Colors.black),
-                                    decoration: const InputDecoration(
-                                        errorStyle: TextStyle(
-                                          fontSize: 16.0,
-                                          color: Colors.yellowAccent,
-                                        ),
-                                        hintTextDirection: TextDirection.rtl,
-                                        fillColor: Colors.white,
-                                        filled: true,
-                                        hintStyle: TextStyle(
-                                            fontFamily: "Cairo", fontSize: 20),
-                                        border: OutlineInputBorder(),
-                                        hintText: 'ادخل رقم تليفون العميل'),
-                                    validator: (value) {
-                                      if (value.length < 11 || value.isEmpty) {
-                                        return "ادخل رقم العميل الصحيح";
-                                      } else
-                                        return null;
-                                    },
-                                    obscureText: true,
-                                    onChanged: (val) {
-                                      setState(() => PhoneNumber = val);
-                                    }),
+                              Text(
+                                "time in arabic",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Cairo",
+                                    fontSize: 30),
                               ),
-                              SizedBox(height: 20.0),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: Size(160, 65),
-                                  primary: Colors.blue, // background
-                                  onPrimary: Colors.yellow, // foreground
-                                ),
-                                child: Text(
-                                  'تأكيد الحجز',
-                                  style: TextStyle(
-                                      fontFamily: "Cairo",
-                                      fontSize: 20,
-                                      color: Colors.white),
-                                ),
-                                onPressed: () async {
-                                  if (_formKey.currentState.validate()) {
-                                    await rt.UpdateUserData(
-                                        args.user,
-                                        args.indexOfThisField,
-                                        args.slotsReserved,
-                                        NameOfCustomer,
-                                        PhoneNumber,
-                                        args.dayIndex);
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                              )
                             ],
-                          )),
+                          ),
+                        ),
+                        Form(
+                          key: _formKey,
+                          child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 30.0, horizontal: 200.0),
+                              child: Column(
+                                children: <Widget>[
+                                  Container(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        ':اسم العميل',
+                                        style: TextStyle(
+                                            fontFamily: "Cairo",
+                                            fontSize: 28,
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 1.0),
+                                  Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: TextFormField(
+                                        style: TextStyle(
+                                            fontFamily: "Cairo",
+                                            fontSize: 20,
+                                            color: Colors.black),
+                                        decoration: const InputDecoration(
+                                            errorStyle: TextStyle(
+                                              fontSize: 16.0,
+                                              color: Colors.yellowAccent,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            border: OutlineInputBorder(),
+                                            hintStyle: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20),
+                                            hintTextDirection:
+                                                TextDirection.rtl,
+                                            hintText: "ادخل اسم العميل"),
+                                        validator: (value) {
+                                          if (value == '') {
+                                            return "ادخل اسم العميل بشكل صحيح";
+                                          } else
+                                            return null;
+                                        },
+                                        onChanged: (val) {
+                                          setState(() => NameOfCustomer = val);
+                                        }),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  Container(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        ':رقم تليفون العميل',
+                                        style: TextStyle(
+                                            fontFamily: "Cairo",
+                                            fontSize: 28,
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: TextFormField(
+                                        autofocus: true,
+                                        style: TextStyle(
+                                            fontFamily: "Cairo",
+                                            fontSize: 18,
+                                            color: Colors.black),
+                                        decoration: const InputDecoration(
+                                            errorStyle: TextStyle(
+                                              fontSize: 16.0,
+                                              color: Colors.yellowAccent,
+                                            ),
+                                            hintTextDirection:
+                                                TextDirection.rtl,
+                                            fillColor: Colors.white,
+                                            filled: true,
+                                            hintStyle: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20),
+                                            border: OutlineInputBorder(),
+                                            hintText: 'ادخل رقم تليفون العميل'),
+                                        validator: (value) {
+                                          if (value.length < 11 ||
+                                              value.isEmpty) {
+                                            return "ادخل رقم العميل الصحيح";
+                                          } else
+                                            return null;
+                                        },
+                                        obscureText: true,
+                                        onChanged: (val) {
+                                          setState(() => PhoneNumber = val);
+                                        }),
+                                  ),
+                                  SizedBox(height: 20.0),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: Size(160, 65),
+                                      primary: Colors.blue, // background
+                                      onPrimary: Colors.yellow, // foreground
+                                    ),
+                                    child: Text(
+                                      'تأكيد الحجز',
+                                      style: TextStyle(
+                                          fontFamily: "Cairo",
+                                          fontSize: 20,
+                                          color: Colors.white),
+                                    ),
+                                    onPressed: () async {
+                                      print(args.dayIndex);
+
+                                      if (_formKey.currentState.validate()) {
+                                        await rt.UpdateUserData(
+                                            args.user,
+                                            args.indexOfThisField,
+                                            args.slotsReserved,
+                                            NameOfCustomer,
+                                            PhoneNumber,
+                                            args.dayIndex);
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                  )
+                                ],
+                              )),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
         ));
   }

@@ -9,6 +9,7 @@ import 'package:futbook_school/Services/RealTimeDBService.dart';
 import 'package:futbook_school/Services/auth.dart';
 import 'package:futbook_school/Services/date.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Slots extends StatefulWidget {
   List SlotsMeaning = [
@@ -96,10 +97,10 @@ class _SlotsState extends State<Slots> {
   Future<List<SingleButtonBlock>> ListOfBlocksBuilder(
       List listOfAllData) async {
     int startTime =
-        await _firestoreService.getThisSchoolDataStartTime('schoolDocName');
+        await _firestoreService.getThisSchoolDataStartTime(args.user.email);
 
     int endTime =
-        await _firestoreService.getThisSchoolDataEndTime('schoolDocName');
+        await _firestoreService.getThisSchoolDataEndTime(args.user.email);
     startTime -= 8;
     endTime -= 8;
     if (startTime < 0) {
@@ -136,6 +137,7 @@ class _SlotsState extends State<Slots> {
               '-' +
               daysArray[currentDayIndex].year.toString(),
           Field: args.indexOfThisField,
+          user: args.user,
         ));
         counter++;
         sequentialIndex++;
@@ -353,6 +355,7 @@ class _SlotsState extends State<Slots> {
                   return StreamBuilder(
                       //here we can use provider along with sliderOfDays class to update the state
                       stream: RealTimeDBService().streamValueOfUserData(
+                          args.user,
                           args.indexOfThisField,
                           daysArray[currentDayIndex].day.toString() +
                               '-' +
@@ -390,7 +393,10 @@ class _SlotsState extends State<Slots> {
                                   );
                                 } else {
                                   return Container(
-                                      child: CircularProgressIndicator());
+                                      alignment: Alignment.center,
+                                      child: SpinKitFoldingCube(
+                                        color: Colors.green,
+                                      ));
                                 }
                               },
                             ));
@@ -400,7 +406,11 @@ class _SlotsState extends State<Slots> {
             ]),
           );
         } else {
-          return Container(child: CircularProgressIndicator());
+          return Container(
+              alignment: Alignment.center,
+              child: SpinKitFoldingCube(
+                color: Colors.green,
+              ));
         }
       },
     ));
@@ -450,9 +460,12 @@ class ReserveButton extends StatelessWidget {
                     indexOfThisField: args.indexOfThisField,
                     slotsReserved:
                         context.read<ProvidersModel>().slotsToBeReserved,
-                    dayIndex: daysArray[currentDayIndex].day.toString() +
-                        '/' +
-                        daysArray[currentDayIndex].month.toString(),
+                    dayIndex: (daysArray[currentDayIndex].day.toString() +
+                            "-" +
+                            daysArray[currentDayIndex].month.toString() +
+                            "-" +
+                            daysArray[currentDayIndex].year.toString())
+                        .toString(),
                     dayWeekdayArabic: Slots().weekdaysInArabic[
                         daysArray[currentDayIndex].weekday.toString()]));
           } else {

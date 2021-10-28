@@ -9,6 +9,7 @@ class DataWithNameAndPhoneNumber {
   final String Day;
   final List slots;
   final bool arrived;
+  final User user;
 
   DataWithNameAndPhoneNumber(
       {this.arrived,
@@ -17,5 +18,5 @@ class DataWithNameAndPhoneNumber {
       this.indexOfThisField,
       this.slotsMeaning,
       this.slots,
-      this.Day});
+      this.Day,this.user});
 }

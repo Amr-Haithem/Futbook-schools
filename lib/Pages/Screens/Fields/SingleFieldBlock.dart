@@ -18,8 +18,8 @@ class _SingleFieldBlockState extends State<SingleFieldBlock> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-            ),
+          borderRadius: BorderRadius.circular(18.0),
+        ),
         textStyle: TextStyle(
           //color: Colors.yellow,
           fontSize: 50,
@@ -32,12 +32,31 @@ class _SingleFieldBlockState extends State<SingleFieldBlock> {
             arguments: DataOfUserAndFieldIndexOnly(
                 user: widget.user, indexOfThisField: widget.indexOfFieldBlock));
       },
-      child: Text("ملعب " + (widget.indexOfFieldBlock + 1).toString() + "",
-          style: TextStyle(
-            fontFamily: "Cairo",
-            color: Colors.black,
-            fontSize: 50,
-          )),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("ملعب ",
+              style: TextStyle(
+                fontFamily: "Cairo",
+                color: Colors.black,
+                fontSize: 50,
+              )),
+          Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white.withOpacity(.8),
+              ),
+              alignment: Alignment.center,
+              width: 120,
+              child: Text((widget.indexOfFieldBlock + 1).toString(),
+                  style: TextStyle(
+                    fontFamily: "Cairo",
+                    color: Colors.black,
+                    fontSize: 50,
+                  ))),
+        ],
+      ),
     );
   }
 }
