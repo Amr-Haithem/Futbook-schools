@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
@@ -25,60 +27,123 @@ class FirestoreService {
   Future<int> getThisSchoolDataStartTime(String schoolEmail) async {
     try {
       Map x = {};
-      await schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).get().then((value) {
+      await schoolsList
+          .doc(getUserNameFromEmailAddress(schoolEmail))
+          .get()
+          .then((value) {
         x = value.data();
       });
       return x['startTime'];
+    } on SocketException {
+      return Future.error(
+          "فشلت العملية تأكد من الأتصال بالأنترنت و أعد المحاولة");
+    } on HttpException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    } on FormatException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     } catch (e) {
-      print('error in getting school start time data');
-      return null;
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     }
   }
 
   Future<int> getThisSchoolDataEndTime(String schoolEmail) async {
     try {
       Map x = {};
-      await schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).get().then((value) {
+      await schoolsList
+          .doc(getUserNameFromEmailAddress(schoolEmail))
+          .get()
+          .then((value) {
         x = value.data();
       });
       return x['endTime'];
+    } on SocketException {
+      return Future.error(
+          "فشلت العملية تأكد من الأتصال بالأنترنت و أعد المحاولة");
+    } on HttpException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    } on FormatException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     } catch (e) {
-      print('error in getting school start time data');
-      return null;
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     }
   }
 
   Future<int> getNumberOfFieldsFunc(String schoolEmail) async {
     try {
+      //throw SocketException('message');
+
       Map x = {};
-      await schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).get().then((value) {
+      await schoolsList
+          .doc(getUserNameFromEmailAddress(schoolEmail))
+          .get()
+          .then((value) {
         x = value.data();
       });
       return x['numberOfFields'];
+    } on SocketException {
+      return Future.error(
+          "فشلت العملية تأكد من الأتصال بالأنترنت و أعد المحاولة");
+    } on HttpException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    } on FormatException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     } catch (e) {
-      print('error in getting school start time data');
-      return null;
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     }
   }
 
   Future<String> getSchoolRealName(String schoolEmail) async {
     try {
+      //throw SocketException('message');
       Map x = {};
       await general_Flags.doc('schoolNames').get().then((value) {
         x = value.data();
       });
       return x[schoolEmail];
+    } on SocketException {
+      return Future.error(
+          "فشلت العملية تأكد من الأتصال بالأنترنت و أعد المحاولة");
+    } on HttpException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    } on FormatException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     } catch (e) {
-      print('error in getting school start time data');
-      return null;
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
     }
   }
 
   //getting stream from schools list data firestore
   Stream listenToDataFromSchoolList(String schoolEmail) {
-    return schoolsList.doc(getUserNameFromEmailAddress(schoolEmail)).snapshots();
+    return schoolsList
+        .doc(getUserNameFromEmailAddress(schoolEmail))
+        .snapshots();
   }
-  
+
+  Future<num> getPriceOfReservation(String schoolEmail, int fieldIndex) async {
+    try {
+      Map x = {};
+
+      await schoolsList
+          .doc(getUserNameFromEmailAddress(schoolEmail))
+          .get()
+          .then((value) {
+        x = value.data();
+      });
+      print(x);
+      print(x['fieldsCosts']);
+      print(x['fieldsCosts']["field" + fieldIndex.toString()]);
+      return x['fieldsCosts']["field" + fieldIndex.toString()];
+    } on SocketException {
+      return Future.error(
+          "فشلت العملية تأكد من الأتصال بالأنترنت و أعد المحاولة");
+    } on HttpException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    } on FormatException {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    } catch (e) {
+      return Future.error("فشلت العملية برجاء إعادة المحاولة");
+    }
+  }
 
   String getUserNameFromEmailAddress(String s) {
     String newS = "";

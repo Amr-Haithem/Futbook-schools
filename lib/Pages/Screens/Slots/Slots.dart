@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithoutNameAndPhoneNumber.dart';
@@ -96,68 +98,83 @@ class _SlotsState extends State<Slots> {
 
   Future<List<SingleButtonBlock>> ListOfBlocksBuilder(
       List listOfAllData) async {
-    int startTime =
-        await _firestoreService.getThisSchoolDataStartTime(args.user.email);
+    try {
+      int startTime =
+          await _firestoreService.getThisSchoolDataStartTime(args.user.email);
 
-    int endTime =
-        await _firestoreService.getThisSchoolDataEndTime(args.user.email);
-    startTime -= 8;
-    endTime -= 8;
-    if (startTime < 0) {
-      startTime += 24;
-    }
-    ;
-    if (endTime < 0) {
-      endTime += 24;
-    }
-    int sequentialIndex = 0;
-    int counter = 0;
-    List<SingleButtonBlock> listOfBlocks = [];
-    for (int i = startTime; i < endTime; i++) {
-      if (listOfAllData != null &&
-          counter < listOfAllData.length &&
-          i == listOfAllData[counter]['slots'][0]) {
-        i += listOfAllData[counter]['slots'].length - 1;
-
-        listOfBlocks.add(SingleButtonBlock(
-          sequentialIndex: sequentialIndex,
-          slotMeaning: slotsMeaningGiver(listOfAllData[counter]['slots']),
-          scale: listOfAllData[counter]['slots'].length,
-          slots: listOfAllData[counter]['slots'],
-          name: listOfAllData[counter]['nameOfCustomer'],
-          phoneNumber: listOfAllData[counter]['phoneNumberOfCustomer'],
-          Reserved: true,
-          Arrived: listOfAllData[counter]['arrived'] == null ||
-                  listOfAllData[counter]['arrived'] == false
-              ? false
-              : true,
-          Day: daysArray[currentDayIndex].day.toString() +
-              '-' +
-              daysArray[currentDayIndex].month.toString() +
-              '-' +
-              daysArray[currentDayIndex].year.toString(),
-          Field: args.indexOfThisField,
-          user: args.user,
-        ));
-        counter++;
-        sequentialIndex++;
-      } else {
-        listOfBlocks.add(SingleButtonBlock(
-            sequentialIndex: sequentialIndex,
-            slotMeaning: widget.SlotsMeaning[i],
-            scale: 1,
-            slots: listProviderForNumbersBiggerThan9(i),
-            Reserved: false,
-            Arrived: false));
-        sequentialIndex++;
+      int endTime =
+          await _firestoreService.getThisSchoolDataEndTime(args.user.email);
+      startTime -= 8;
+      endTime -= 8;
+      if (startTime < 0) {
+        startTime += 24;
       }
+      ;
+      if (endTime < 0) {
+        endTime += 24;
+      }
+      int sequentialIndex = 0;
+      int counter = 0;
+      List<SingleButtonBlock> listOfBlocks = [];
+      for (int i = startTime; i < endTime; i++) {
+        if (listOfAllData != null &&
+            counter < listOfAllData.length &&
+            i == listOfAllData[counter]['slots'][0]) {
+          i += listOfAllData[counter]['slots'].length - 1;
+
+          listOfBlocks.add(SingleButtonBlock(
+              sequentialIndex: sequentialIndex,
+              slotMeaning: slotsMeaningGiver(listOfAllData[counter]['slots']),
+              scale: listOfAllData[counter]['slots'].length,
+              slots: listOfAllData[counter]['slots'],
+              name: listOfAllData[counter]['nameOfCustomer'],
+              phoneNumber: listOfAllData[counter]['phoneNumberOfCustomer'],
+              Reserved: true,
+              Arrived: listOfAllData[counter]['arrived'] == null ||
+                      listOfAllData[counter]['arrived'] == false
+                  ? false
+                  : true,
+              Day: daysArray[currentDayIndex].day.toString() +
+                  '-' +
+                  daysArray[currentDayIndex].month.toString() +
+                  '-' +
+                  daysArray[currentDayIndex].year.toString(),
+              Field: args.indexOfThisField,
+              user: args.user,
+              reservationCost: listOfAllData[counter]['reservationCost'],
+              userApp: listOfAllData[counter]['user_app']));
+          counter++;
+          sequentialIndex++;
+        } else {
+          listOfBlocks.add(SingleButtonBlock(
+              sequentialIndex: sequentialIndex,
+              slotMeaning: widget.SlotsMeaning[i],
+              scale: 1,
+              slots: listProviderForNumbersBiggerThan9(i),
+              Reserved: false,
+              Arrived: false));
+          sequentialIndex++;
+        }
+      }
+      return listOfBlocks;
+    } on SocketException {
+      return Future.error("مشكلة في الاتصال بالانترنت.اتصل و اعد المحاولة");
+    } on HttpException {
+      return Future.error(
+          "مشكلة في تحميل الحجوزات برجاء الاتصال بخدمة العملاء");
+    } on FormatException {
+      return Future.error(
+          "مشكلة في تحميل الحجوزات برجاء الاتصال بخدمة العملاء");
+    } catch (e) {
+      return Future.error(
+          "مشكلة في تحميل الحجوزات برجاء الاتصال بخدمة العملاء");
     }
-    return listOfBlocks;
   }
 
   @override
   Future<void> initState() {
     super.initState();
+
     //ahmed sameh (is it a good practice?)
     Future.delayed(Duration.zero, () {
       setState(() {
@@ -166,15 +183,10 @@ class _SlotsState extends State<Slots> {
     });
   }
 
-  //code of the slider
   List daysArray = [];
-  /*
-  http resopncse gdedddn
-  */
 
   //functionalities of the arrows
   int currentDayIndex = 0;
-  int numberOfFields = 7;
   bool _isButton1Disabled = true;
   bool _isButton2Disabled = false;
 
@@ -201,11 +213,12 @@ class _SlotsState extends State<Slots> {
     else
       return () {
         setState(() {
-          if (currentDayIndex < numberOfFields) {
+          if (currentDayIndex < daysArray.length - 1) {
             currentDayIndex++;
             _isButton1Disabled = false;
           }
-          if (currentDayIndex == numberOfFields) _isButton2Disabled = true;
+          if (currentDayIndex == daysArray.length - 1)
+            _isButton2Disabled = true;
         });
       };
   }
@@ -214,7 +227,6 @@ class _SlotsState extends State<Slots> {
   Widget build(BuildContext context) {
     Widget backToFiledsOrCancelButton() {
       if (context.read<ProvidersModel>().somethingSelected) {
-        print("hello");
         return SizedBox(
           width: 125,
           child: ElevatedButton(
@@ -224,7 +236,9 @@ class _SlotsState extends State<Slots> {
                   fontSize: 35,
                 )),
             child: Text("إلغاء"),
-            onPressed: () async {},
+            onPressed: () async {
+              // SingleButtonBlock().enteredValue.value = [];
+            },
           ),
         );
       } else {
@@ -252,159 +266,248 @@ class _SlotsState extends State<Slots> {
       future: Date().fetchDate(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          date = snapshot.data;
-          daysArray = [];
+          if (snapshot.hasData) {
+            date = snapshot.data;
+            daysArray = [];
 
-          for (int i = 0; i < 7; i++) {
-            daysArray.add(date.add(Duration(days: i)));
-          }
-          return Container(
-            color: Colors.grey[100],
-            child: Wrap(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    backToFiledsOrCancelButton(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          (args.indexOfThisField + 1).toString() + ' ملعب',
-                          style: TextStyle(fontFamily: "Cairo", fontSize: 42),
-                        ),
-                        Text(
-                            daysArray[currentDayIndex].day.toString() +
-                                '-' +
-                                daysArray[currentDayIndex].month.toString(),
-                            style:
-                                TextStyle(fontFamily: "Cairo", fontSize: 30)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 30,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    primary: Colors.grey[700]),
-                                onPressed: isBackButtonEnabled(),
-                                child: IconButton(
-                                  color: Colors.grey,
-                                  icon: Transform.translate(
-                                    offset: Offset(-10, -4),
-                                    child: Icon(
-                                      Icons.arrow_back_rounded,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 15),
-                            Text(
-                              widget.weekdaysInArabic[daysArray[currentDayIndex]
-                                  .weekday
-                                  .toString()],
+            for (int i = 0; i < 7; i++) {
+              daysArray.add(date.add(Duration(days: i)));
+            }
+            return Container(
+              color: Colors.grey[100],
+              child: Wrap(children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      backToFiledsOrCancelButton(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            (args.indexOfThisField + 1).toString() + ' ملعب',
+                            style: TextStyle(fontFamily: "Cairo", fontSize: 42),
+                          ),
+                          Text(
+                              daysArray[currentDayIndex].day.toString() +
+                                  '-' +
+                                  daysArray[currentDayIndex].month.toString(),
                               style:
-                                  TextStyle(fontFamily: 'Cairo', fontSize: 30),
-                            ),
-                            SizedBox(width: 15),
-                            Container(
-                              width: 50,
-                              height: 30,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    primary: Colors.grey[700]),
-                                onPressed: isForwardButtonEnabled(),
-                                child: IconButton(
-                                  color: Colors.grey[800],
-                                  icon: Transform.translate(
-                                    offset: Offset(-10, -4),
-                                    child: Icon(
-                                      Icons.arrow_forward_rounded,
-                                      color: Colors.white,
+                                  TextStyle(fontFamily: "Cairo", fontSize: 30)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 30,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.grey[700]),
+                                  onPressed: isBackButtonEnabled(),
+                                  child: IconButton(
+                                    color: Colors.grey,
+                                    icon: Transform.translate(
+                                      offset: Offset(-10, -4),
+                                      child: Icon(
+                                        Icons.arrow_back_rounded,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(children: [
-                      //choose between two buttons
-                      ReserveButton(
+                              SizedBox(width: 15),
+                              Text(
+                                widget.weekdaysInArabic[
+                                    daysArray[currentDayIndex]
+                                        .weekday
+                                        .toString()],
+                                style: TextStyle(
+                                    fontFamily: 'Cairo', fontSize: 30),
+                              ),
+                              SizedBox(width: 15),
+                              Container(
+                                width: 50,
+                                height: 30,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.grey[700]),
+                                  onPressed: isForwardButtonEnabled(),
+                                  child: IconButton(
+                                    color: Colors.grey[800],
+                                    icon: Transform.translate(
+                                      offset: Offset(-10, -4),
+                                      child: Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Column(children: [
+                        //choose between two buttons
+                        ReserveButton(
                           rt: rt,
                           args: args,
                           daysArray: daysArray,
-                          currentDayIndex: currentDayIndex)
-                    ])
-                  ],
+                          currentDayIndex: currentDayIndex,
+                          slotsMeaningGiver: slotsMeaningGiver,
+                        )
+                      ])
+                    ],
+                  ),
                 ),
-              ),
-              StreamBuilder(
-                initialData: null,
-                stream:
-                    _firestoreService.listenToDataFromSchoolList('schoolId'),
-                builder: (context, snapshot1) {
-                  return StreamBuilder(
-                      //here we can use provider along with sliderOfDays class to update the state
-                      stream: RealTimeDBService().streamValueOfUserData(
-                          args.user,
-                          args.indexOfThisField,
-                          daysArray[currentDayIndex].day.toString() +
-                              '-' +
-                              daysArray[currentDayIndex].month.toString() +
-                              '-' +
-                              daysArray[currentDayIndex].year.toString()),
-                      builder: (context, snapshot) {
-                        List listOfAllData;
-                        if (snapshot.hasData) {
-                          print('Stream changed');
-                          Map allData = snapshot.data.snapshot.value;
+                StreamBuilder(
+                  initialData: null,
+                  stream:
+                      _firestoreService.listenToDataFromSchoolList('schoolId'),
+                  builder: (context, snapshot1) {
+                    return StreamBuilder(
+                        //here we can use provider along with sliderOfDays class to update the state
+                        stream: RealTimeDBService().streamValueOfUserData(
+                            args.user,
+                            args.indexOfThisField,
+                            daysArray[currentDayIndex].day.toString() +
+                                '-' +
+                                daysArray[currentDayIndex].month.toString() +
+                                '-' +
+                                daysArray[currentDayIndex].year.toString()),
+                        builder: (context, snapshot) {
+                          List listOfAllData;
+                          if (snapshot.hasData) {
+                            print('Stream changed');
+                            Map allData = snapshot.data.snapshot.value;
 
-                          if (allData != null) {
-                            listOfAllData = allData.values.toList();
-                            print(listOfAllData);
+                            if (allData != null) {
+                              listOfAllData = allData.values.toList();
+                              print(listOfAllData);
+                            }
                           }
-                        }
-                        return Container(
-                            //color: Colors.blueGrey,
-                            height: 500,
-                            width: 1000,
-                            child: FutureBuilder(
-                              future: ListOfBlocksBuilder(listOfAllData),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.done) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Wrap(
-                                      spacing: 10.0,
-                                      runSpacing: 10.0,
-                                      direction: Axis.vertical,
-                                      children: snapshot.data,
-                                    ),
-                                  );
-                                } else {
-                                  return Container(
-                                      alignment: Alignment.center,
-                                      child: SpinKitFoldingCube(
-                                        color: Colors.green,
-                                      ));
-                                }
-                              },
-                            ));
-                      });
-                },
-              )
-            ]),
-          );
+                          return Container(
+                              //color: Colors.blueGrey,
+                              height: 500,
+                              width: 1000,
+                              child: FutureBuilder(
+                                future: ListOfBlocksBuilder(listOfAllData),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    if (snapshot.hasData) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Wrap(
+                                          spacing: 10.0,
+                                          runSpacing: 10.0,
+                                          direction: Axis.vertical,
+                                          children: snapshot.data,
+                                        ),
+                                      );
+                                    } else {
+                                      return Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Center(
+                                              child: Text(
+                                            snapshot.error.toString(),
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 30),
+                                          )),
+                                          MaterialButton(
+                                            onPressed: () {
+                                              setState(() {});
+                                            },
+                                            color: Colors.white,
+                                            textColor: Colors.black,
+                                            child: Icon(
+                                              Icons.refresh_rounded,
+                                              size: 33,
+                                            ),
+                                            padding: EdgeInsets.all(16),
+                                            shape: CircleBorder(),
+                                          ),
+                                          SizedBox(
+                                            height: 30,
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                                primary: Colors.red[700],
+                                                textStyle: TextStyle(
+                                                  fontSize: 30,
+                                                )),
+                                            child: Text("رجوع"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  } else {
+                                    return Container(
+                                        alignment: Alignment.center,
+                                        child: SpinKitFoldingCube(
+                                          color: Colors.green,
+                                        ));
+                                  }
+                                },
+                              ));
+                        });
+                  },
+                )
+              ]),
+            );
+          } else {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Center(
+                    child: Text(
+                  snapshot.error.toString(),
+                  style: TextStyle(fontFamily: "Cairo", fontSize: 30),
+                )),
+                MaterialButton(
+                  onPressed: () {
+                    setState(() {});
+                  },
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    size: 33,
+                  ),
+                  padding: EdgeInsets.all(16),
+                  shape: CircleBorder(),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.red[700],
+                      textStyle: TextStyle(
+                        fontSize: 30,
+                      )),
+                  child: Text("رجوع"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          }
         } else {
           return Container(
               alignment: Alignment.center,
@@ -424,12 +527,35 @@ class ReserveButton extends StatelessWidget {
     @required this.args,
     @required this.daysArray,
     @required this.currentDayIndex,
+    @required this.slotsMeaningGiver,
   }) : super(key: key);
 
   final RealTimeDBService rt;
   final DataOfUserAndFieldIndexOnly args;
   final List daysArray;
   final int currentDayIndex;
+  final Function slotsMeaningGiver;
+
+  List returningTheActualSlots(List s) {
+    List x = [];
+    for (var i = 0; i < s.length; i++) {
+      if (s[i].toString()[0] == 'a' ||
+          s[i].toString()[0] == 'b' ||
+          s[i].toString()[0] == 'c' ||
+          s[i].toString()[0] == 'd' ||
+          s[i].toString()[0] == 'e' ||
+          s[i].toString()[0] == 'f' ||
+          s[i].toString()[0] == 'g' ||
+          s[i].toString()[0] == 'h') {
+        x.add(int.parse(s[i].toString().substring(1)));
+      } else {
+        x.add(int.parse(s[i].toString()));
+      }
+    }
+    print("hello");
+    print(x);
+    return x;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -443,21 +569,57 @@ class ReserveButton extends StatelessWidget {
             )),
         child: Text("احجز"),
         onPressed: () async {
-          if (await rt.updateReservationData(
-                  args.user,
-                  args.indexOfThisField,
-                  context.read<ProvidersModel>().slotsToBeReserved,
-                  (daysArray[currentDayIndex].day.toString() +
-                          "-" +
-                          daysArray[currentDayIndex].month.toString() +
-                          "-" +
-                          daysArray[currentDayIndex].year.toString())
-                      .toString()) &&
+          if (await rt
+                  .updateReservationData(
+                      args.user,
+                      args.indexOfThisField,
+                      context.read<ProvidersModel>().slotsToBeReserved,
+                      (daysArray[currentDayIndex].day.toString() +
+                              "-" +
+                              daysArray[currentDayIndex].month.toString() +
+                              "-" +
+                              daysArray[currentDayIndex].year.toString())
+                          .toString())
+                  .catchError((e) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: AlertDialog(
+                          title: Text("فشل في العملية",
+                              style:
+                                  TextStyle(fontFamily: "Cairo", fontSize: 23)),
+                          content: SingleChildScrollView(
+                            child: ListBody(
+                              children: <Widget>[
+                                Text(e,
+                                    style: TextStyle(
+                                        fontFamily: "Cairo", fontSize: 20)),
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text("رجوع",
+                                  style: TextStyle(
+                                      fontFamily: "Cairo", fontSize: 20)),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    });
+              }) &&
               context.read<ProvidersModel>().slotsToBeReserved.isNotEmpty) {
             Navigator.pushNamed(context, '/CustomerInfo',
                 arguments: DataWithoutNameAndPhoneNumber(
                     user: args.user,
                     indexOfThisField: args.indexOfThisField,
+                    duration: slotsMeaningGiver(returningTheActualSlots(
+                        context.read<ProvidersModel>().slotsToBeReserved)),
                     slotsReserved:
                         context.read<ProvidersModel>().slotsToBeReserved,
                     dayIndex: (daysArray[currentDayIndex].day.toString() +
@@ -469,6 +631,37 @@ class ReserveButton extends StatelessWidget {
                     dayWeekdayArabic: Slots().weekdaysInArabic[
                         daysArray[currentDayIndex].weekday.toString()]));
           } else {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: AlertDialog(
+                      title: Text("فشل في العملية",
+                          style: TextStyle(fontFamily: "Cairo", fontSize: 23)),
+                      content: SingleChildScrollView(
+                        child: ListBody(
+                          children: <Widget>[
+                            Text(
+                                'هذه الساعات محجوزة بالفعل بالرجاء التواصل مع الدعم الفني',
+                                style: TextStyle(
+                                    fontFamily: "Cairo", fontSize: 20)),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text("رجوع",
+                              style:
+                                  TextStyle(fontFamily: "Cairo", fontSize: 20)),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                });
             print("didn't register : a message from slots page");
           }
         },

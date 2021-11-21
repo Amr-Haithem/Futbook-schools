@@ -1,10 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Pages/Screens/Fields/SingleFieldBlock.dart';
-import 'package:futbook_school/Pages/Screens/Slots/Slots.dart';
 import 'package:futbook_school/Services/FirestoreService.dart';
-import 'package:futbook_school/Services/auth.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Fields extends StatefulWidget {
@@ -25,7 +22,8 @@ class _FieldsState extends State<Fields> {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: StreamBuilder<Object>(
-          stream: _firestoreService.listenToDataFromSchoolList(widget.user.email),
+          stream:
+              _firestoreService.listenToDataFromSchoolList(widget.user.email),
           builder: (context, snapshot) {
             return Container(
               height: height,
@@ -36,8 +34,6 @@ class _FieldsState extends State<Fields> {
                   fit: BoxFit.cover,
                 ),
               ),
-              //color: Colors.white,
-
               child: FutureBuilder(
                 future: Future.wait([
                   _firestoreService.getNumberOfFieldsFunc(widget.user.email),
@@ -45,40 +41,70 @@ class _FieldsState extends State<Fields> {
                 ]),
                 builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return Column(
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(50),
-                                bottomRight: Radius.circular(50)),
-                            color: Colors.white.withOpacity(.9),
+                    if (snapshot.hasData) {
+                      return Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(50),
+                                  bottomRight: Radius.circular(50)),
+                              color: Colors.white.withOpacity(.9),
+                            ),
+                            width: width * .4,
+                            height: height * .2,
+                            child: Text(snapshot.data[1],
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Cairo",
+                                    fontSize: 33)),
                           ),
-                          width: width * .4,
-                          height: height * .2,
-                          child: Text(snapshot.data[1],
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: "Cairo",
-                                  fontSize: 33)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(40.0),
-                          child: Wrap(
-                            direction: Axis.horizontal,
-                            alignment: WrapAlignment.center,
-                            spacing: 30.0,
-                            runSpacing: 30.0,
-                            children: List<SingleFieldBlock>.generate(
-                                snapshot.data[0],
-                                (int index) => SingleFieldBlock(
-                                    indexOfFieldBlock: index,
-                                    user: widget.user)),
+                          Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Wrap(
+                              direction: Axis.horizontal,
+                              alignment: WrapAlignment.center,
+                              spacing: 30.0,
+                              runSpacing: 30.0,
+                              children: List<SingleFieldBlock>.generate(
+                                  snapshot.data[0],
+                                  (int index) => SingleFieldBlock(
+                                      indexOfFieldBlock: index,
+                                      user: widget.user)),
+                            ),
                           ),
-                        ),
-                      ],
-                    );
+                        ],
+                      );
+                    } else {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Center(
+                              child: Text(
+                            snapshot.error.toString(),
+                            style: TextStyle(fontFamily: "Cairo", fontSize: 30),
+                          )),
+                          MaterialButton(
+                            onPressed: () {
+                              setState(() {});
+                            },
+                            color: Colors.white,
+                            textColor: Colors.black,
+                            child: Icon(
+                              Icons.refresh_rounded,
+                              size: 33,
+                            ),
+                            padding: EdgeInsets.all(16),
+                            shape: CircleBorder(),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          )
+                        ],
+                      );
+                    }
                   } else {
                     return Container(
                         alignment: Alignment.center,

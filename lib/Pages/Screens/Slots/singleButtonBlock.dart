@@ -18,6 +18,8 @@ class SingleButtonBlock extends StatefulWidget {
   final String Day;
   final int Field;
   final User user;
+  final num reservationCost;
+  final bool userApp;
 
   const SingleButtonBlock(
       {this.sequentialIndex,
@@ -29,7 +31,10 @@ class SingleButtonBlock extends StatefulWidget {
       this.Reserved,
       this.Arrived,
       this.Day,
-      this.Field,this.user});
+      this.Field,
+      this.user,
+      this.reservationCost,
+      this.userApp});
 
   @override
   _SingleButtonBlockState createState() => _SingleButtonBlockState();
@@ -40,6 +45,9 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   RealTimeDBService rt = RealTimeDBService();
   Color backgroundColorSwitch = Colors.greenAccent[400];
   static ValueNotifier<List> enteredValue = ValueNotifier([]);
+  set setEnteredValue(List x) {
+    enteredValue.value = x;
+  }
 
   @override
   void initState() {
@@ -118,23 +126,20 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
       child: ValueListenableBuilder(
         valueListenable: enteredValue,
         builder: (context, newVal, child) {
-          for (int i = 0; i < newVal.length; i++) {
-            if (widget.sequentialIndex == newVal[i] && widget.Reserved) {
-              //here i used this to trim if there's a reserved slot in the way
-              newVal.removeRange(widget.sequentialIndex, newVal.length);
-            }
+          if (newVal.contains(widget.sequentialIndex) && widget.Reserved) {
+            //here i used this to trim if there's a reserved slot in the way
+            newVal.removeRange(widget.sequentialIndex - 1, newVal.length);
           }
-          for (int i = 0; i < newVal.length; i++) {
-            if (widget.sequentialIndex == newVal[i]) {
-              print(widget.Reserved);
-              context
-                  .read<ProvidersModel>()
-                  .slotsToBeReserved
-                  .add(widget.slots);
-              print(context.read<ProvidersModel>().slotsToBeReserved);
-              break;
-            }
+
+          if (newVal.contains(widget.sequentialIndex)) {
+            print(widget.Reserved);
+            context
+                .read<ProvidersModel>()
+                .slotsToBeReserved
+                .add(widget.slots[0]);
+            print(context.read<ProvidersModel>().slotsToBeReserved);
           }
+
           return ElevatedButton(
             child: Wrap(
               direction: Axis.horizontal,
@@ -159,7 +164,9 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
                         slotsMeaning: widget.slotMeaning,
                         slots: widget.slots,
                         Day: widget.Day,
-                        user: widget.user));
+                        user: widget.user,
+                        reservationCost: widget.reservationCost,
+                        userApp: widget.userApp));
               } else {
                 context.read<ProvidersModel>().slotsToBeReserved = [];
                 if (enteredValue.value.isEmpty) {

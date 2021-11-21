@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithNameAndPhoneNumber.dart';
 import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
+import 'package:path/path.dart';
 import 'package:provider/src/provider.dart';
 
 //What's this
@@ -37,54 +38,244 @@ class _InvoiceState extends State<Invoice> {
     final DataWithNameAndPhoneNumber args =
         ModalRoute.of(context).settings.arguments;
 
-    Row ifNotArrivedShow() {
+    Row confirmationAndCancelationShower() {
       if (args.arrived || selectedNow) {
         return Row();
       } else {
-        return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 150,
-                height: 60,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      textStyle: TextStyle(
-                        fontSize: 35,
-                      )),
-                  onPressed: () {},
-                  child: Text("إلغاء الحجز",
-                      style: TextStyle(fontFamily: "Cairo", fontSize: 22)),
+        if (args.userApp) {
+          return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 150,
+                  height: 60,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.lightGreenAccent[700],
+                        textStyle: TextStyle(
+                          fontSize: 35,
+                        )),
+                    onPressed: () async {
+                      setState(() {
+                        selectedNow = true;
+                      });
+                      print(getChildOfDayFromSlots(args.slots));
+                      rt
+                          .updatingArrivedReservations(
+                              args.user,
+                              args.indexOfThisField,
+                              getChildOfDayFromSlots(args.slots),
+                              args.Day)
+                          .catchError((e) {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: AlertDialog(
+                                  title: Text("فشل في العملية",
+                                      style: TextStyle(
+                                          fontFamily: "Cairo", fontSize: 23)),
+                                  content: SingleChildScrollView(
+                                    child: ListBody(
+                                      children: <Widget>[
+                                        Text(e,
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20)),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text("رجوع",
+                                          style: TextStyle(
+                                              fontFamily: "Cairo",
+                                              fontSize: 20)),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            });
+                      });
+                    },
+                    child: Text("تأكيد الدفع",
+                        style: TextStyle(fontFamily: "Cairo", fontSize: 23)),
+                  ),
                 ),
-              ),
-              SizedBox(width: 20),
-              Container(
-                width: 150,
-                height: 60,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      primary: Colors.lightGreenAccent[700],
-                      textStyle: TextStyle(
-                        fontSize: 35,
-                      )),
-                  onPressed: () async {
-                    setState(() {
-                      selectedNow = true;
-                    });
-                    print(getChildOfDayFromSlots(args.slots));
-                    rt.updatingArrivedReservations(
-                        args.user,
-                        args.indexOfThisField,
-                        getChildOfDayFromSlots(args.slots),
-                        args.Day);
-                  },
-                  child: Text("تأكيد الدفع",
-                      style: TextStyle(fontFamily: "Cairo", fontSize: 23)),
+              ]);
+        } else {
+          return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 150,
+                  height: 60,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.red,
+                        textStyle: TextStyle(
+                          fontSize: 35,
+                        )),
+                    onPressed: () {
+                      rt
+                          .unReserveReservationDataSlots(args.user,
+                              args.indexOfThisField, args.slots, args.Day)
+                          .then((value) {
+                        rt
+                            .unreserveSlotsFromUserData(args.user.email,
+                                args.slots, args.Day, args.indexOfThisField)
+                            .then((value) {
+                          Navigator.of(context).pop();
+
+                          print("unreserved a phone reservation");
+                        }).catchError((e) {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Directionality(
+                                  textDirection: TextDirection.rtl,
+                                  child: AlertDialog(
+                                    title: Text("فشل في العملية",
+                                        style: TextStyle(
+                                            fontFamily: "Cairo", fontSize: 23)),
+                                    content: SingleChildScrollView(
+                                      child: ListBody(
+                                        children: <Widget>[
+                                          Text(e,
+                                              style: TextStyle(
+                                                  fontFamily: "Cairo",
+                                                  fontSize: 20)),
+                                        ],
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text("رجوع",
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20)),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              });
+                        });
+                      }).catchError((e) {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: AlertDialog(
+                                  title: Text("فشل في العملية",
+                                      style: TextStyle(
+                                          fontFamily: "Cairo", fontSize: 23)),
+                                  content: SingleChildScrollView(
+                                    child: ListBody(
+                                      children: <Widget>[
+                                        Text(e,
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20)),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text("رجوع",
+                                          style: TextStyle(
+                                              fontFamily: "Cairo",
+                                              fontSize: 20)),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            });
+                      });
+                    },
+                    child: Text("إلغاء الحجز",
+                        style: TextStyle(fontFamily: "Cairo", fontSize: 22)),
+                  ),
                 ),
-              ),
-            ]);
+                SizedBox(width: 20),
+                Container(
+                  width: 150,
+                  height: 60,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.lightGreenAccent[700],
+                        textStyle: TextStyle(
+                          fontSize: 35,
+                        )),
+                    onPressed: () async {
+                      setState(() {
+                        selectedNow = true;
+                      });
+                      print(getChildOfDayFromSlots(args.slots));
+                      rt
+                          .updatingArrivedReservations(
+                              args.user,
+                              args.indexOfThisField,
+                              getChildOfDayFromSlots(args.slots),
+                              args.Day)
+                          .catchError((e) {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: AlertDialog(
+                                  title: Text("فشل في العملية",
+                                      style: TextStyle(
+                                          fontFamily: "Cairo", fontSize: 23)),
+                                  content: SingleChildScrollView(
+                                    child: ListBody(
+                                      children: <Widget>[
+                                        Text(e,
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20)),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text("رجوع",
+                                          style: TextStyle(
+                                              fontFamily: "Cairo",
+                                              fontSize: 20)),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            });
+                      });
+                    },
+                    child: Text("تأكيد الدفع",
+                        style: TextStyle(fontFamily: "Cairo", fontSize: 23)),
+                  ),
+                ),
+              ]);
+        }
       }
     }
 
@@ -137,25 +328,32 @@ class _InvoiceState extends State<Invoice> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
-                          height: 60,
+                          height: 50,
                         ),
                         Text((args.indexOfThisField + 1).toString() + "ملعب ",
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 40)),
-                        SizedBox(height: 30),
+                        SizedBox(height: 20),
                         Text(args.slotsMeaning,
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 30)),
-                        SizedBox(height: 30),
+                        SizedBox(height: 20),
+                        Text(
+                            args.userApp
+                                ? "عن طريق التطبيق"
+                                : "عن طريق التليفون",
+                            style:
+                                TextStyle(fontFamily: "Cairo", fontSize: 30)),
+                        SizedBox(height: 20),
                         Text(args.nameOfCustomer,
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 40)),
-                        SizedBox(height: 30),
+                        SizedBox(height: 20),
                         Text(args.PhoneNumber,
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 30)),
-                        SizedBox(height: 30),
-                        Text(200.toString() + " EGP",
+                        SizedBox(height: 20),
+                        Text(args.reservationCost.toString() + " EGP",
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 45)),
                       ],
@@ -165,7 +363,7 @@ class _InvoiceState extends State<Invoice> {
                 SizedBox(
                   height: 30,
                 ),
-                ifNotArrivedShow()
+                confirmationAndCancelationShower()
               ],
             ),
           ],
@@ -174,3 +372,41 @@ class _InvoiceState extends State<Invoice> {
     );
   }
 }
+/*
+   .catchError((e) {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Directionality(
+                                textDirection: TextDirection.rtl,
+                                child: AlertDialog(
+                                  title: Text("فشل في العملية",
+                                      style: TextStyle(
+                                          fontFamily: "Cairo", fontSize: 23)),
+                                  content: SingleChildScrollView(
+                                    child: ListBody(
+                                      children: <Widget>[
+                                        Text(e,
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20)),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text("رجوع",
+                                          style: TextStyle(
+                                              fontFamily: "Cairo",
+                                              fontSize: 20)),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            });
+                      });
+                     */

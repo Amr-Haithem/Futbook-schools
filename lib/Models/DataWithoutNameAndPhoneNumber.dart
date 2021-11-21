@@ -6,7 +6,13 @@ class DataWithoutNameAndPhoneNumber {
   final List slotsReserved;
   final String dayIndex;
   final String dayWeekdayArabic;
+  final String duration;
 
   DataWithoutNameAndPhoneNumber(
-      {this.user, this.indexOfThisField, this.slotsReserved, this.dayIndex,this.dayWeekdayArabic});
+      {this.user,
+      this.indexOfThisField,
+      this.slotsReserved,
+      this.dayIndex,
+      this.dayWeekdayArabic,
+      this.duration});
 }

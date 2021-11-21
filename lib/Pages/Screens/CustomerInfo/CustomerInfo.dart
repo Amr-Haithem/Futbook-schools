@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithoutNameAndPhoneNumber.dart';
+import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
+import 'package:provider/src/provider.dart';
 
 //what is this
 //  const CustomerInfo({Key? key}) : super(key: key);
@@ -45,12 +47,49 @@ class _CustomerInfoState extends State<CustomerInfo> {
                     child: MaterialButton(
                       onPressed: () async {
                         //here's the code
-                        await rt.unReserveReservationDataSlots(
-                            args.user,
-                            args.indexOfThisField,
-                            args.slotsReserved,
-                            args.dayIndex);
-                        Navigator.of(context).pop();
+                        await rt
+                            .unReserveReservationDataSlots(
+                                args.user,
+                                args.indexOfThisField,
+                                args.slotsReserved,
+                                args.dayIndex)
+                            .then((value) => Navigator.of(context).pop())
+                            .catchError((e) {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Directionality(
+                                  textDirection: TextDirection.rtl,
+                                  child: AlertDialog(
+                                    title: Text("فشل في العملية",
+                                        style: TextStyle(
+                                            fontFamily: "Cairo", fontSize: 23)),
+                                    content: SingleChildScrollView(
+                                      child: ListBody(
+                                        children: <Widget>[
+                                          Text(e,
+                                              style: TextStyle(
+                                                  fontFamily: "Cairo",
+                                                  fontSize: 20)),
+                                        ],
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text("رجوع",
+                                            style: TextStyle(
+                                                fontFamily: "Cairo",
+                                                fontSize: 20)),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              });
+                        });
                       },
                       color: Colors.white,
                       textColor: Colors.black,
@@ -100,7 +139,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
                                     fontSize: 40),
                               ),
                               Text(
-                                "time in arabic",
+                                args.duration,
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: "Cairo",
@@ -202,7 +241,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
                                           } else
                                             return null;
                                         },
-                                        obscureText: true,
+                                        obscureText: false,
                                         onChanged: (val) {
                                           setState(() => PhoneNumber = val);
                                         }),
@@ -222,17 +261,67 @@ class _CustomerInfoState extends State<CustomerInfo> {
                                           color: Colors.white),
                                     ),
                                     onPressed: () async {
-                                      print(args.dayIndex);
-
+                                      print(context
+                                          .read<ProvidersModel>()
+                                          .slotsToBeReserved);
+                                      print(args.slotsReserved);
                                       if (_formKey.currentState.validate()) {
-                                        await rt.UpdateUserData(
-                                            args.user,
-                                            args.indexOfThisField,
-                                            args.slotsReserved,
-                                            NameOfCustomer,
-                                            PhoneNumber,
-                                            args.dayIndex);
-                                        Navigator.of(context).pop();
+                                        await rt
+                                            .updateUserData(
+                                                args.user,
+                                                args.indexOfThisField,
+                                                args.slotsReserved,
+                                                NameOfCustomer,
+                                                PhoneNumber,
+                                                args.dayIndex)
+                                            .then((value) =>
+                                                Navigator.of(context).pop())
+                                            .catchError((e) {
+                                          showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return Directionality(
+                                                  textDirection:
+                                                      TextDirection.rtl,
+                                                  child: AlertDialog(
+                                                    title: Text(
+                                                        "فشل في العملية",
+                                                        style: TextStyle(
+                                                            fontFamily: "Cairo",
+                                                            fontSize: 23)),
+                                                    content:
+                                                        SingleChildScrollView(
+                                                      child: ListBody(
+                                                        children: <Widget>[
+                                                          Text(e,
+                                                              style: TextStyle(
+                                                                  fontFamily:
+                                                                      "Cairo",
+                                                                  fontSize:
+                                                                      20)),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        child: const Text(
+                                                            "رجوع",
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    "Cairo",
+                                                                fontSize: 20)),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              });
+                                        });
                                       }
                                     },
                                   )
