@@ -98,6 +98,7 @@ class _SlotsState extends State<Slots> {
 
   Future<List<SingleButtonBlock>> ListOfBlocksBuilder(
       List listOfAllData) async {
+    //throw SocketException('يا حلاوة');
     try {
       int startTime =
           await _firestoreService.getThisSchoolDataStartTime(args.user.email);
@@ -642,8 +643,7 @@ class ReserveButton extends StatelessWidget {
                       content: SingleChildScrollView(
                         child: ListBody(
                           children: <Widget>[
-                            Text(
-                                'هذه الساعات محجوزة بالفعل بالرجاء التواصل مع الدعم الفني',
+                            Text('اختر اوقات متاحة للحجز',
                                 style: TextStyle(
                                     fontFamily: "Cairo", fontSize: 20)),
                           ],

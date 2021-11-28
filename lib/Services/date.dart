@@ -20,6 +20,7 @@ class Date {
 
   Future<DateTime> fetchDate() async {
     try {
+      //throw SocketException('message');
       final url = Uri.parse('https://google.com/%27');
       final response = await get(url);
 
@@ -42,6 +43,7 @@ class Date {
       date = date.add(const Duration(
         hours: 2,
       ));
+
       return date;
     } on SocketException {
       return Future.error("مشكلة في الاتصال بالانترنت.اتصل و اعد المحاولة");
