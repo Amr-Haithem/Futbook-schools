@@ -49,7 +49,7 @@ class _SingleFieldBlockState extends State<SingleFieldBlock> {
               ),
               alignment: Alignment.center,
               width: 120,
-              child: Text((widget.indexOfFieldBlock + 1).toString(),
+              child: Text((widget.indexOfFieldBlock).toString(),
                   style: TextStyle(
                     fontFamily: "Cairo",
                     color: Colors.black,

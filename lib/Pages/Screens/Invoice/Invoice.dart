@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithNameAndPhoneNumber.dart';
-import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
-import 'package:path/path.dart';
-import 'package:provider/src/provider.dart';
 
 //What's this
 //const Invoice({Key? key}) : super(key: key);
@@ -66,7 +63,7 @@ class _InvoiceState extends State<Invoice> {
                               args.user,
                               args.indexOfThisField,
                               getChildOfDayFromSlots(args.slots),
-                              args.Day)
+                              args.dayIndex)
                           .catchError((e) {
                         showDialog(
                             context: context,
@@ -126,11 +123,14 @@ class _InvoiceState extends State<Invoice> {
                     onPressed: () {
                       rt
                           .unReserveReservationDataSlots(args.user,
-                              args.indexOfThisField, args.slots, args.Day)
+                              args.indexOfThisField, args.slots, args.dayIndex)
                           .then((value) {
                         rt
-                            .unreserveSlotsFromUserData(args.user.email,
-                                args.slots, args.Day, args.indexOfThisField)
+                            .unreserveSlotsFromUserData(
+                                args.user.email,
+                                args.slots,
+                                args.dayIndex,
+                                args.indexOfThisField)
                             .then((value) {
                           Navigator.of(context).pop();
 
@@ -232,7 +232,7 @@ class _InvoiceState extends State<Invoice> {
                               args.user,
                               args.indexOfThisField,
                               getChildOfDayFromSlots(args.slots),
-                              args.Day)
+                              args.dayIndex)
                           .catchError((e) {
                         showDialog(
                             context: context,
@@ -349,7 +349,7 @@ class _InvoiceState extends State<Invoice> {
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 40)),
                         SizedBox(height: 20),
-                        Text(args.PhoneNumber,
+                        Text(args.phoneNumber,
                             style:
                                 TextStyle(fontFamily: "Cairo", fontSize: 30)),
                         SizedBox(height: 20),

@@ -1,8 +1,6 @@
-import 'dart:ffi';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:futbook_school/Pages/Screens/Fields/Fields.dart';
 import 'package:futbook_school/Pages/Screens/Invoice/Invoice.dart';
 import 'package:futbook_school/Pages/Screens/Slots/Slots.dart';
 import 'package:provider/provider.dart';

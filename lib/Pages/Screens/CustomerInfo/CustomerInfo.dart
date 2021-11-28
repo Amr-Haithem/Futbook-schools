@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithoutNameAndPhoneNumber.dart';
 import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
+// ignore: implementation_imports
 import 'package:provider/src/provider.dart';
 
 //what is this
@@ -11,7 +12,9 @@ class CustomerInfo extends StatefulWidget {
   _CustomerInfoState createState() => _CustomerInfoState();
 }
 
+// ignore: non_constant_identifier_names
 String NameOfCustomer = '';
+// ignore: non_constant_identifier_names
 String PhoneNumber = '';
 
 class _CustomerInfoState extends State<CustomerInfo> {
@@ -125,7 +128,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
                                     fontSize: 33),
                               ),
                               Text(
-                                args.dayIndex,
+                                args.realDate,
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: "Cairo",

@@ -9,7 +9,8 @@ class FirestoreService {
   CollectionReference schoolsList =
       FirebaseFirestore.instance.collection('Schools_List');
 
-  CollectionReference general_Flags =
+  // ignore: non_constant_identifier_names
+  CollectionReference generalFlags =
       FirebaseFirestore.instance.collection('General_Flags');
 
   Future<void> getSchoolData(String schoolDocName) async {
@@ -96,7 +97,7 @@ class FirestoreService {
     try {
       //throw SocketException('message');
       Map x = {};
-      await general_Flags.doc('schoolNames').get().then((value) {
+      await generalFlags.doc('schoolNames').get().then((value) {
         x = value.data();
       });
       return x[schoolEmail];

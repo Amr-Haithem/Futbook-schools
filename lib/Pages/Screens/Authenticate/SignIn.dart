@@ -10,13 +10,13 @@ class SignIn extends StatefulWidget {
   _SignInState createState() => _SignInState();
 }
 
-final AuthService _auth = AuthService();
-String email = '';
-String password = '';
-
 class _SignInState extends State<SignIn> {
-  final authenticationInstance = new AuthService();
+  final AuthService authenticationInstance = new AuthService();
   final _formKey = GlobalKey<FormState>();
+
+  String email = '';
+  String password = '';
+
   bool errorExists = false;
   @override
   Widget build(BuildContext context) {

@@ -6,7 +6,6 @@ import 'package:firebase_database/firebase_database.dart';
 //the following is the equality class to compare two lists
 import 'package:collection/collection.dart';
 import 'package:futbook_school/Services/FirestoreService.dart';
-import 'package:http/http.dart';
 
 class RealTimeDBService {
   final FirestoreService _firestoreService = FirestoreService();
@@ -131,7 +130,7 @@ class RealTimeDBService {
       num price =
           await _firestoreService.getPriceOfReservation(user.email, fieldIndex);
       await databaseReference
-          .child("User data")
+          .child("User_data")
           //will be replaced by user from email
           .child(getUserNameFromEmailAddress(user.email))
           .child(dayIndex)
@@ -193,7 +192,7 @@ class RealTimeDBService {
   Stream streamValueOfUserData(User user, int fieldIndex, String dayIndex) {
     return FirebaseDatabase.instance
         .reference()
-        .child("User data")
+        .child("User_data")
         .child(getUserNameFromEmailAddress(user.email))
         .child(dayIndex)
         .child(fieldIndex.toString())
@@ -207,7 +206,7 @@ class RealTimeDBService {
       //throw SocketException("message");
 
       await databaseReference
-          .child("User data")
+          .child("User_data")
           //will be replaced by user from email
           .child(getUserNameFromEmailAddress(schoolUser.email))
           .child(dayIndex)
@@ -235,7 +234,7 @@ class RealTimeDBService {
           listProviderForNumbersBiggerThan9(
               slotIndices[slotIndices.length - 1]));
       await databaseReference
-          .child("User data")
+          .child("User_data")
           //will be replaced by user from email
           .child(getUserNameFromEmailAddress(schoolEmail))
           .child(dayIndex)

@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithNameAndPhoneNumber.dart';
 import 'package:futbook_school/Models/ProvidersModel.dart';
@@ -13,13 +12,14 @@ class SingleButtonBlock extends StatefulWidget {
   final List slots;
   final String name;
   final String phoneNumber;
-  final bool Reserved;
-  final bool Arrived;
-  final String Day;
-  final int Field;
+  final bool reserved;
+  final bool arrived;
+  final String day;
+  final int field;
   final User user;
   final num reservationCost;
   final bool userApp;
+  final String dayIndex;
 
   const SingleButtonBlock(
       {this.sequentialIndex,
@@ -28,10 +28,11 @@ class SingleButtonBlock extends StatefulWidget {
       this.slots,
       this.name,
       this.phoneNumber,
-      this.Reserved,
-      this.Arrived,
-      this.Day,
-      this.Field,
+      this.reserved,
+      this.arrived,
+      this.day,
+      this.dayIndex,
+      this.field,
       this.user,
       this.reservationCost,
       this.userApp});
@@ -59,9 +60,9 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   //this function will return a check box if reserved
 
   Color buttonColorSwitch(newVal) {
-    if (widget.Arrived) {
+    if (widget.arrived) {
       return Colors.grey[600];
-    } else if (widget.Reserved) {
+    } else if (widget.reserved) {
       return Colors.grey[400];
     }
     for (int i = 0; i < newVal.length; i++) {
@@ -74,7 +75,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   }
 
   Widget ifArrivedPutCashSignAndLock() {
-    if (widget.Arrived) {
+    if (widget.arrived) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -109,7 +110,8 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   Widget checkboxIfSelected(newVal) {
     for (int i = 0; i < newVal.length; i++) {
       if (widget.sequentialIndex == newVal[i]) {
-        return Checkbox(
+        // ignore: missing_required_param
+        return const Checkbox(
           value: true,
         );
       }
@@ -126,13 +128,13 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
       child: ValueListenableBuilder(
         valueListenable: enteredValue,
         builder: (context, newVal, child) {
-          if (newVal.contains(widget.sequentialIndex) && widget.Reserved) {
+          if (newVal.contains(widget.sequentialIndex) && widget.reserved) {
             //here i used this to trim if there's a reserved slot in the way
             newVal.removeRange(widget.sequentialIndex - 1, newVal.length);
           }
 
           if (newVal.contains(widget.sequentialIndex)) {
-            print(widget.Reserved);
+            print(widget.reserved);
             context
                 .read<ProvidersModel>()
                 .slotsToBeReserved
@@ -154,16 +156,17 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
               ],
             ),
             onPressed: () {
-              if (widget.Reserved) {
+              if (widget.reserved) {
                 Navigator.pushNamed(context, '/Invoice',
                     arguments: DataWithNameAndPhoneNumber(
-                        arrived: widget.Arrived,
+                        arrived: widget.arrived,
                         nameOfCustomer: widget.name,
-                        PhoneNumber: widget.phoneNumber,
-                        indexOfThisField: widget.Field,
+                        phoneNumber: widget.phoneNumber,
+                        indexOfThisField: widget.field,
                         slotsMeaning: widget.slotMeaning,
+                        dayIndex:widget.dayIndex,
                         slots: widget.slots,
-                        Day: widget.Day,
+                        day: widget.day,
                         user: widget.user,
                         reservationCost: widget.reservationCost,
                         userApp: widget.userApp));
@@ -214,7 +217,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
       textList.add(Text(
         x,
         style: TextStyle(
-            color: widget.Arrived ? Colors.white : Colors.grey[900],
+            color: widget.arrived ? Colors.white : Colors.grey[900],
             fontFamily: "Cairo",
             fontSize: 24),
       ));
@@ -222,7 +225,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     textList.add(Text(
       z,
       style: TextStyle(
-          color: widget.Arrived ? Colors.white : Colors.grey[900],
+          color: widget.arrived ? Colors.white : Colors.grey[900],
           fontFamily: "Cairo",
           fontSize: 24),
     ));

@@ -70,7 +70,7 @@ class _FieldsState extends State<Fields> {
                               children: List<SingleFieldBlock>.generate(
                                   snapshot.data[0],
                                   (int index) => SingleFieldBlock(
-                                      indexOfFieldBlock: index,
+                                      indexOfFieldBlock: index+1,
                                       user: widget.user)),
                             ),
                           ),
