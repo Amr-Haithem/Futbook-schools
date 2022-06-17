@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
             create: (context) =>
                 ProvidersModel(slotsToBeReserved: [], somethingSelected: false),
           ),
-          StreamProvider<User>.value(
+          StreamProvider<User?>.value(
             initialData: null,
             value: AuthService().user,
           )

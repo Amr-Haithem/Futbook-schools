@@ -26,7 +26,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     final DataWithoutNameAndPhoneNumber args =
-        ModalRoute.of(context).settings.arguments;
+        ModalRoute.of(context)!.settings.arguments as DataWithoutNameAndPhoneNumber;
     return Scaffold(
         resizeToAvoidBottomInset: true, //use this
         body: Container(
@@ -40,7 +40,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
             onNotification: (overScroll) {
               overScroll.disallowIndicator();
               return;
-            },
+            } as bool Function(OverscrollIndicatorNotification)?,
             child: SingleChildScrollView(
               child: Stack(
                 children: [
@@ -238,7 +238,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
                                             border: OutlineInputBorder(),
                                             hintText: 'ادخل رقم تليفون العميل'),
                                         validator: (value) {
-                                          if (value.length < 11 ||
+                                          if (value!.length < 11 ||
                                               value.isEmpty) {
                                             return "ادخل رقم العميل الصحيح";
                                           } else
@@ -268,7 +268,7 @@ class _CustomerInfoState extends State<CustomerInfo> {
                                           .read<ProvidersModel>()
                                           .slotsToBeReserved);
                                       print(args.slotsReserved);
-                                      if (_formKey.currentState.validate()) {
+                                      if (_formKey.currentState!.validate()) {
                                         await rt
                                             .updateUserData(
                                                 args.user,

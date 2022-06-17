@@ -3,18 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 class DataWithoutNameAndPhoneNumber {
   final User user;
   final int indexOfThisField;
-  final List slotsReserved;
+  final List/*!*//*!*/ slotsReserved;
   final String dayIndex;
   final String dayWeekdayArabic;
   final String duration;
   final String realDate;
 
   DataWithoutNameAndPhoneNumber(
-      {this.user,
-      this.indexOfThisField,
-      this.slotsReserved,
-      this.dayIndex,
-      this.realDate,
-      this.dayWeekdayArabic,
-      this.duration});
+      {required this.user,
+      required this.indexOfThisField,
+      required this.slotsReserved,
+      required this.dayIndex,
+      required this.realDate,
+      required this.dayWeekdayArabic,
+      required this.duration});
 }

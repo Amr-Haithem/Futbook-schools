@@ -27,14 +27,14 @@ class FirestoreService {
 
   Future<int> getThisSchoolDataStartTime(String schoolEmail) async {
     try {
-      Map x = {};
+      Map? x = {};
       await schoolsList
           .doc(getUserNameFromEmailAddress(schoolEmail))
           .get()
           .then((value) {
-        x = value.data();
+        x = value.data() as Map<dynamic, dynamic>?;
       });
-      return x['startTime'];
+      return x!['startTime'];
     } on SocketException {
       return Future.error(
           "فشلت العملية تأكد من الأتصال بالأنترنت و أعد المحاولة");
@@ -49,12 +49,12 @@ class FirestoreService {
 
   Future<int> getThisSchoolDataEndTime(String schoolEmail) async {
     try {
-      Map x = {};
+      Map/*!*//*!*/ x = {};
       await schoolsList
           .doc(getUserNameFromEmailAddress(schoolEmail))
           .get()
           .then((value) {
-        x = value.data();
+        x = value.data() as Map<dynamic, dynamic>;
       });
       return x['endTime'];
     } on SocketException {
@@ -73,12 +73,12 @@ class FirestoreService {
     try {
       //throw SocketException('message');
 
-      Map x = {};
+      Map/*!*/ x = {};
       await schoolsList
           .doc(getUserNameFromEmailAddress(schoolEmail))
           .get()
           .then((value) {
-        x = value.data();
+        x = value.data() as Map<dynamic, dynamic>;
       });
       return x['numberOfFields'];
     } on SocketException {
@@ -93,12 +93,12 @@ class FirestoreService {
     }
   }
 
-  Future<String> getSchoolRealName(String schoolEmail) async {
+  Future<String> getSchoolRealName(String? schoolEmail) async {
     try {
       //throw SocketException('message');
-      Map x = {};
+      Map/*!*/ x = {};
       await generalFlags.doc('schoolNames').get().then((value) {
-        x = value.data();
+        x = value.data() as Map<dynamic, dynamic>;
       });
       return x[schoolEmail];
     } on SocketException {
@@ -120,15 +120,15 @@ class FirestoreService {
         .snapshots();
   }
 
-  Future<num> getPriceOfReservation(String schoolEmail, int fieldIndex) async {
+  Future<num?> getPriceOfReservation(String/*!*/ schoolEmail, int fieldIndex) async {
     try {
-      Map x = {};
+      Map/*!*/ x = {};
 
       await schoolsList
           .doc(getUserNameFromEmailAddress(schoolEmail))
           .get()
           .then((value) {
-        x = value.data();
+        x = value.data() as Map<dynamic, dynamic>;
       });
       print(x);
       print(x['fieldsCosts']);

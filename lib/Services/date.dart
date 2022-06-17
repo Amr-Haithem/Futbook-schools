@@ -27,13 +27,13 @@ class Date {
       print(response.contentLength);
       print(response.headers['date']);
 
-      final List<String> splitResponse = response.headers['date'].split(' ');
+      final List<String> splitResponse = response.headers['date']!.split(' ');
       final List<int> time =
           splitResponse[4].split(':').map((e) => int.parse(e)).toList();
 
       DateTime date = DateTime(
         int.parse(splitResponse[3]),
-        _monthNames[splitResponse[2]],
+        _monthNames[splitResponse[2]]!,
         int.parse(splitResponse[1]),
         time[0],
         time[1],

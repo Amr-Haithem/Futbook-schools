@@ -7,7 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 class Fields extends StatefulWidget {
   final User user;
 
-  const Fields({this.user});
+  const Fields({required this.user});
 
   @override
   _FieldsState createState() => _FieldsState();
@@ -23,7 +23,7 @@ class _FieldsState extends State<Fields> {
     return Scaffold(
       body: StreamBuilder<Object>(
           stream:
-              _firestoreService.listenToDataFromSchoolList(widget.user.email),
+              _firestoreService.listenToDataFromSchoolList(widget.user.email!) as Stream<Object>?,
           builder: (context, snapshot) {
             return Container(
               height: height,
@@ -36,7 +36,7 @@ class _FieldsState extends State<Fields> {
               ),
               child: FutureBuilder(
                 future: Future.wait([
-                  _firestoreService.getNumberOfFieldsFunc(widget.user.email),
+                  _firestoreService.getNumberOfFieldsFunc(widget.user.email!),
                   _firestoreService.getSchoolRealName(widget.user.email)
                 ]),
                 builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -54,7 +54,7 @@ class _FieldsState extends State<Fields> {
                             ),
                             width: width * .4,
                             height: height * .2,
-                            child: Text(snapshot.data[1],
+                            child: Text(snapshot.data![1],
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: "Cairo",
@@ -68,7 +68,7 @@ class _FieldsState extends State<Fields> {
                               spacing: 30.0,
                               runSpacing: 30.0,
                               children: List<SingleFieldBlock>.generate(
-                                  snapshot.data[0],
+                                  snapshot.data![0],
                                   (int index) => SingleFieldBlock(
                                       indexOfFieldBlock: index+1,
                                       user: widget.user)),

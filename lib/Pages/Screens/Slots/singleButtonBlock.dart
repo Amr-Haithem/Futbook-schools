@@ -7,19 +7,19 @@ import 'package:provider/provider.dart';
 
 class SingleButtonBlock extends StatefulWidget {
   final sequentialIndex;
-  final String slotMeaning;
-  final int scale;
-  final List slots;
-  final String name;
-  final String phoneNumber;
-  final bool reserved;
-  final bool arrived;
-  final String day;
-  final int field;
-  final User user;
-  final num reservationCost;
-  final bool userApp;
-  final String dayIndex;
+  final String? slotMeaning;
+  final int? scale;
+  final List? slots;
+  final String? name;
+  final String? phoneNumber;
+  final bool? reserved;
+  final bool? arrived;
+  final String? day;
+  final int? field;
+  final User? user;
+  final num? reservationCost;
+  final bool? userApp;
+  final String? dayIndex;
 
   const SingleButtonBlock(
       {this.sequentialIndex,
@@ -44,7 +44,7 @@ class SingleButtonBlock extends StatefulWidget {
 class _SingleButtonBlockState extends State<SingleButtonBlock> {
   bool selected = false;
   RealTimeDBService rt = RealTimeDBService();
-  Color backgroundColorSwitch = Colors.greenAccent[400];
+  Color? backgroundColorSwitch = Colors.greenAccent[400];
   static ValueNotifier<List> enteredValue = ValueNotifier([]);
   set setEnteredValue(List x) {
     enteredValue.value = x;
@@ -59,10 +59,10 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
 
   //this function will return a check box if reserved
 
-  Color buttonColorSwitch(newVal) {
-    if (widget.arrived) {
+  Color? buttonColorSwitch(newVal) {
+    if (widget.arrived!) {
       return Colors.grey[600];
-    } else if (widget.reserved) {
+    } else if (widget.reserved!) {
       return Colors.grey[400];
     }
     for (int i = 0; i < newVal.length; i++) {
@@ -75,7 +75,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
   }
 
   Widget ifArrivedPutCashSignAndLock() {
-    if (widget.arrived) {
+    if (widget.arrived!) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -127,8 +127,8 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     return Container(
       child: ValueListenableBuilder(
         valueListenable: enteredValue,
-        builder: (context, newVal, child) {
-          if (newVal.contains(widget.sequentialIndex) && widget.reserved) {
+        builder: (context, dynamic newVal, child) {
+          if (newVal.contains(widget.sequentialIndex) && widget.reserved!) {
             //here i used this to trim if there's a reserved slot in the way
             newVal.removeRange(widget.sequentialIndex - 1, newVal.length);
           }
@@ -138,7 +138,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
             context
                 .read<ProvidersModel>()
                 .slotsToBeReserved
-                .add(widget.slots[0]);
+                .add(widget.slots![0]);
             print(context.read<ProvidersModel>().slotsToBeReserved);
           }
 
@@ -149,27 +149,27 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: nameAndPhoneShower(widget.name, widget.slotMeaning),
+                  children: nameAndPhoneShower(widget.name, widget.slotMeaning!),
                 ),
                 ifArrivedPutCashSignAndLock(),
                 checkboxIfSelected(newVal)
               ],
             ),
             onPressed: () {
-              if (widget.reserved) {
+              if (widget.reserved!) {
                 Navigator.pushNamed(context, '/Invoice',
                     arguments: DataWithNameAndPhoneNumber(
-                        arrived: widget.arrived,
-                        nameOfCustomer: widget.name,
-                        phoneNumber: widget.phoneNumber,
-                        indexOfThisField: widget.field,
-                        slotsMeaning: widget.slotMeaning,
-                        dayIndex:widget.dayIndex,
-                        slots: widget.slots,
-                        day: widget.day,
-                        user: widget.user,
-                        reservationCost: widget.reservationCost,
-                        userApp: widget.userApp));
+                        arrived: widget.arrived!,
+                        nameOfCustomer: widget.name!,
+                        phoneNumber: widget.phoneNumber!,
+                        indexOfThisField: widget.field!,
+                        slotsMeaning: widget.slotMeaning!,
+                        dayIndex:widget.dayIndex!,
+                        slots: widget.slots!,
+                        day: widget.day!,
+                        user: widget.user!,
+                        reservationCost: widget.reservationCost!,
+                        userApp: widget.userApp!));
               } else {
                 context.read<ProvidersModel>().slotsToBeReserved = [];
                 if (enteredValue.value.isEmpty) {
@@ -202,7 +202,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
             style: ElevatedButton.styleFrom(
               side: BorderSide(width: 1, color: Colors.black),
               primary: buttonColorSwitch(newVal),
-              minimumSize: Size(328.0, 80.0 * widget.scale),
+              minimumSize: Size(328.0, 80.0 * widget.scale!),
             ),
           );
         },
@@ -210,14 +210,14 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     );
   }
 
-  List<Text> nameAndPhoneShower(String x, String z) {
+  List<Text> nameAndPhoneShower(String? x, String z) {
     List<Text> textList = [];
 
     if (x != null) {
       textList.add(Text(
         x,
         style: TextStyle(
-            color: widget.arrived ? Colors.white : Colors.grey[900],
+            color: widget.arrived! ? Colors.white : Colors.grey[900],
             fontFamily: "Cairo",
             fontSize: 24),
       ));
@@ -225,7 +225,7 @@ class _SingleButtonBlockState extends State<SingleButtonBlock> {
     textList.add(Text(
       z,
       style: TextStyle(
-          color: widget.arrived ? Colors.white : Colors.grey[900],
+          color: widget.arrived! ? Colors.white : Colors.grey[900],
           fontFamily: "Cairo",
           fontSize: 24),
     ));

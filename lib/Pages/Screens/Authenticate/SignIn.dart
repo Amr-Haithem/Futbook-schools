@@ -35,7 +35,7 @@ class _SignInState extends State<SignIn> {
             onNotification: (overScroll) {
               overScroll.disallowIndicator();
               return;
-            },
+            } as bool Function(OverscrollIndicatorNotification)?,
             child: SingleChildScrollView(
               child: Container(
                 height: height,
@@ -167,7 +167,7 @@ class _SignInState extends State<SignIn> {
                                 await authenticationInstance
                                     .signInWithEmailAndPass(email, password);
 
-                                _formKey.currentState.validate();
+                                _formKey.currentState!.validate();
                               },
                             )
                           ],

@@ -14,15 +14,15 @@ class DataWithNameAndPhoneNumber {
   final String dayIndex;
 
   DataWithNameAndPhoneNumber(
-      {this.arrived,
-      this.nameOfCustomer,
-      this.phoneNumber,
-      this.indexOfThisField,
-      this.slotsMeaning,
-      this.dayIndex,
-      this.slots,
-      this.day,
-      this.user,
-      this.reservationCost,
-      this.userApp});
+      {required this.arrived,
+      required this.nameOfCustomer,
+      required this.phoneNumber,
+      required this.indexOfThisField,
+      required this.slotsMeaning,
+      required this.dayIndex,
+      required this.slots,
+      required this.day,
+      required this.user,
+      required this.reservationCost,
+      required this.userApp});
 }

@@ -74,10 +74,10 @@ class RealTimeDBService {
       User user, int fieldIndex, List slotIndices, String dayIndex) async {
     try {
       //throw SocketException('message');
-      print(getUserNameFromEmailAddress(user.email));
+      print(getUserNameFromEmailAddress(user.email!));
 
       if (await checkInstantlyIfReserved(
-          getUserNameFromEmailAddress(user.email),
+          getUserNameFromEmailAddress(user.email!),
           fieldIndex,
           slotIndices,
           dayIndex)) {
@@ -90,7 +90,7 @@ class RealTimeDBService {
         }
         await databaseReference
             .child("Reservation_Data")
-            .child(getUserNameFromEmailAddress(user.email))
+            .child(getUserNameFromEmailAddress(user.email!))
             .child(dayIndex)
             .child(fieldIndex.toString())
             .update(slotsToBeReserved);
@@ -128,11 +128,11 @@ class RealTimeDBService {
     try {
       //throw SocketException('message');
       num price =
-          await _firestoreService.getPriceOfReservation(user.email, fieldIndex);
+          await (_firestoreService.getPriceOfReservation(user.email!, fieldIndex) as FutureOr<num>);
       await databaseReference
           .child("User_data")
           //will be replaced by user from email
-          .child(getUserNameFromEmailAddress(user.email))
+          .child(getUserNameFromEmailAddress(user.email!))
           .child(dayIndex)
           .child(fieldIndex.toString())
           .child(slotIndices[0].toString() +
@@ -170,7 +170,7 @@ class RealTimeDBService {
       await databaseReference
           .child("Reservation_Data")
           //will be replaced by user from email
-          .child(getUserNameFromEmailAddress(user.email))
+          .child(getUserNameFromEmailAddress(user.email!))
           .child(dayIndex)
           .child(fieldIndex.toString())
           .update(x);
@@ -193,7 +193,7 @@ class RealTimeDBService {
     return FirebaseDatabase.instance
         .reference()
         .child("User_data")
-        .child(getUserNameFromEmailAddress(user.email))
+        .child(getUserNameFromEmailAddress(user.email!))
         .child(dayIndex)
         .child(fieldIndex.toString())
         //todo take a look if to change on vlaue
@@ -208,7 +208,7 @@ class RealTimeDBService {
       await databaseReference
           .child("User_data")
           //will be replaced by user from email
-          .child(getUserNameFromEmailAddress(schoolUser.email))
+          .child(getUserNameFromEmailAddress(schoolUser.email!))
           .child(dayIndex)
           .child(requestedFieldIndex.toString())
           .child(reservationKey)
@@ -258,7 +258,7 @@ class RealTimeDBService {
   }
 
 //functional methods (not database related):
-  String getUserNameFromEmailAddress(String s) {
+  String getUserNameFromEmailAddress(String/*!*/ s) {
     String newS = "";
     for (int i = 0; i < s.length; i++) {
       if (s[i] == '@') {

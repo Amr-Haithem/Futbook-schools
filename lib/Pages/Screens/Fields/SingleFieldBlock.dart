@@ -6,7 +6,7 @@ class SingleFieldBlock extends StatefulWidget {
   final int indexOfFieldBlock;
   final User user;
 
-  const SingleFieldBlock({this.indexOfFieldBlock, this.user});
+  const SingleFieldBlock({required this.indexOfFieldBlock, required this.user});
 
   @override
   _SingleFieldBlockState createState() => _SingleFieldBlockState();

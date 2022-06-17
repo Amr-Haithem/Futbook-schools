@@ -5,7 +5,7 @@ class AuthService {
 
   //tracks whenever the user changes authentication state and send it to the main.dart
   Stream<User> get user {
-    return _auth.authStateChanges().map((User user) => user);
+    return _auth.authStateChanges().map(((User? user) => user!) as User Function(User?));
   }
 /*
   Future SignInAnon() async {

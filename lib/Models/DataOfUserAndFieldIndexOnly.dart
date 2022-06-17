@@ -7,6 +7,6 @@ class DataOfUserAndFieldIndexOnly{
   final User user;
   final int indexOfThisField;
 
-  DataOfUserAndFieldIndexOnly({this.user, this.indexOfThisField});
+  DataOfUserAndFieldIndexOnly({required this.user, required this.indexOfThisField});
 
 }

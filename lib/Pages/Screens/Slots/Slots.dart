@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:futbook_school/Models/DataWithoutNameAndPhoneNumber.dart';
 import 'package:futbook_school/Models/DataOfUserAndFieldIndexOnly.dart';
@@ -6,13 +8,12 @@ import 'package:futbook_school/Models/ProvidersModel.dart';
 import 'package:futbook_school/Pages/Screens/Slots/singleButtonBlock.dart';
 import 'package:futbook_school/Services/FirestoreService.dart';
 import 'package:futbook_school/Services/RealTimeDBService.dart';
+import 'package:futbook_school/Services/auth.dart';
 import 'package:futbook_school/Services/date.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-// ignore: must_be_immutable
 class Slots extends StatefulWidget {
-  // ignore: non_constant_identifier_names
   List SlotsMeaning = [
     '8 AM - 9 AM',
     '9 AM - 10 AM',
@@ -61,6 +62,7 @@ class _SlotsState extends State<Slots> {
   DateTime date;
 
   final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _auth = AuthService();
   final rt = RealTimeDBService();
   DataOfUserAndFieldIndexOnly args;
 
@@ -94,7 +96,7 @@ class _SlotsState extends State<Slots> {
     return s + y;
   }
 
-  Future<List<SingleButtonBlock>> listOfBlocksBuilder(
+  Future<List<SingleButtonBlock>> ListOfBlocksBuilder(
       List listOfAllData) async {
     //throw SocketException('يا حلاوة');
     try {
@@ -108,7 +110,7 @@ class _SlotsState extends State<Slots> {
       if (startTime < 0) {
         startTime += 24;
       }
-
+      ;
       if (endTime < 0) {
         endTime += 24;
       }
@@ -128,18 +130,17 @@ class _SlotsState extends State<Slots> {
               slots: listOfAllData[counter]['slots'],
               name: listOfAllData[counter]['nameOfCustomer'],
               phoneNumber: listOfAllData[counter]['phoneNumberOfCustomer'],
-              reserved: true,
-              arrived: listOfAllData[counter]['arrived'] == null ||
+              Reserved: true,
+              Arrived: listOfAllData[counter]['arrived'] == null ||
                       listOfAllData[counter]['arrived'] == false
                   ? false
                   : true,
-              dayIndex: "day_" + daysArray[currentDayIndex].day.toString(),
-              day: daysArray[currentDayIndex].day.toString() +
+              Day: daysArray[currentDayIndex].day.toString() +
                   '-' +
                   daysArray[currentDayIndex].month.toString() +
                   '-' +
                   daysArray[currentDayIndex].year.toString(),
-              field: args.indexOfThisField,
+              Field: args.indexOfThisField,
               user: args.user,
               reservationCost: listOfAllData[counter]['reservationCost'],
               userApp: listOfAllData[counter]['user_app']));
@@ -151,8 +152,8 @@ class _SlotsState extends State<Slots> {
               slotMeaning: widget.SlotsMeaning[i],
               scale: 1,
               slots: listProviderForNumbersBiggerThan9(i),
-              reserved: false,
-              arrived: false));
+              Reserved: false,
+              Arrived: false));
           sequentialIndex++;
         }
       }
@@ -181,8 +182,6 @@ class _SlotsState extends State<Slots> {
         args = ModalRoute.of(context).settings.arguments;
       });
     });
-    //i don't know what's this
-    return null;
   }
 
   List daysArray = [];
@@ -261,6 +260,7 @@ class _SlotsState extends State<Slots> {
     }
 
     print("emptied slots array");
+    //TODO to ensure null-safety put an ! after (context)
 
     return Scaffold(
         body: FutureBuilder(
@@ -289,7 +289,7 @@ class _SlotsState extends State<Slots> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            args.indexOfThisField.toString() + ' ملعب',
+                            (args.indexOfThisField + 1).toString() + ' ملعب',
                             style: TextStyle(fontFamily: "Cairo", fontSize: 42),
                           ),
                           Text(
@@ -316,7 +316,7 @@ class _SlotsState extends State<Slots> {
                                         Icons.arrow_back_rounded,
                                         color: Colors.white,
                                       ),
-                                    ), onPressed: () {  },
+                                    ),
                                   ),
                                 ),
                               ),
@@ -337,7 +337,6 @@ class _SlotsState extends State<Slots> {
                                   style: ElevatedButton.styleFrom(
                                       primary: Colors.grey[700]),
                                   onPressed: isForwardButtonEnabled(),
-                                  // ignore: missing_required_param
                                   child: IconButton(
                                     color: Colors.grey[800],
                                     icon: Transform.translate(
@@ -377,7 +376,11 @@ class _SlotsState extends State<Slots> {
                         stream: RealTimeDBService().streamValueOfUserData(
                             args.user,
                             args.indexOfThisField,
-                            'day_' + daysArray[currentDayIndex].day.toString()),
+                            daysArray[currentDayIndex].day.toString() +
+                                '-' +
+                                daysArray[currentDayIndex].month.toString() +
+                                '-' +
+                                daysArray[currentDayIndex].year.toString()),
                         builder: (context, snapshot) {
                           List listOfAllData;
                           if (snapshot.hasData) {
@@ -394,7 +397,7 @@ class _SlotsState extends State<Slots> {
                               height: 500,
                               width: 1000,
                               child: FutureBuilder(
-                                future: listOfBlocksBuilder(listOfAllData),
+                                future: ListOfBlocksBuilder(listOfAllData),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.done) {
@@ -572,7 +575,12 @@ class ReserveButton extends StatelessWidget {
                       args.user,
                       args.indexOfThisField,
                       context.read<ProvidersModel>().slotsToBeReserved,
-                      "day_" + daysArray[currentDayIndex].day.toString())
+                      (daysArray[currentDayIndex].day.toString() +
+                              "-" +
+                              daysArray[currentDayIndex].month.toString() +
+                              "-" +
+                              daysArray[currentDayIndex].year.toString())
+                          .toString())
                   .catchError((e) {
                 showDialog(
                     context: context,
@@ -615,9 +623,7 @@ class ReserveButton extends StatelessWidget {
                         context.read<ProvidersModel>().slotsToBeReserved)),
                     slotsReserved:
                         context.read<ProvidersModel>().slotsToBeReserved,
-                    dayIndex:
-                        "day_" + daysArray[currentDayIndex].day.toString(),
-                    realDate: (daysArray[currentDayIndex].day.toString() +
+                    dayIndex: (daysArray[currentDayIndex].day.toString() +
                             "-" +
                             daysArray[currentDayIndex].month.toString() +
                             "-" +

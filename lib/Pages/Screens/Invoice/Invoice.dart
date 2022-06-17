@@ -33,7 +33,7 @@ class _InvoiceState extends State<Invoice> {
   @override
   Widget build(BuildContext context) {
     final DataWithNameAndPhoneNumber args =
-        ModalRoute.of(context).settings.arguments;
+        ModalRoute.of(context)!.settings.arguments as DataWithNameAndPhoneNumber;
 
     Row confirmationAndCancelationShower() {
       if (args.arrived || selectedNow) {
@@ -127,7 +127,7 @@ class _InvoiceState extends State<Invoice> {
                           .then((value) {
                         rt
                             .unreserveSlotsFromUserData(
-                                args.user.email,
+                                args.user.email!,
                                 args.slots,
                                 args.dayIndex,
                                 args.indexOfThisField)
